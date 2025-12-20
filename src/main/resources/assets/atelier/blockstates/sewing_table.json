@@ -1,0 +1,164 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "part": "left",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/left"
+      }
+    },
+    {
+      "when": {
+        "part": "left",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/left",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "part": "left",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/left",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "part": "left",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/left",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "part": "right",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/right"
+      }
+    },
+    {
+      "when": {
+        "part": "right",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/right",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "part": "right",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/right",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "part": "right",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/right",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "part": "machine",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/machine"
+      }
+    },
+    {
+      "when": {
+        "part": "machine",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/machine",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "part": "machine",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/machine",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "part": "machine",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/machine",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "spool": "true",
+        "part": "machine",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/spool"
+      }
+    },
+    {
+      "when": {
+        "spool": "true",
+        "part": "machine",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/spool",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "spool": "true",
+        "part": "machine",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/spool",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "spool": "true",
+        "part": "machine",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "atelier:block/sewing_table/spool",
+        "y": 270
+      }
+    }
+  ]
+}

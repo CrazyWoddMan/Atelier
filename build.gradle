@@ -1,0 +1,223 @@
+plugins {
+    id 'java-library'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7.+'
+    id 'com.modrinth.minotaur' version '2.+'
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = mod_id
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+minecraft {
+    mappings channel: mapping_channel, version: mapping_version
+    copyIdeResources = true
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        client {
+            property 'forge.enabledGameTestNamespaces', mod_id
+        }
+
+        server {
+            property 'forge.enabledGameTestNamespaces', mod_id
+            args '--nogui'
+        }
+
+        gameTestServer {
+            property 'forge.enabledGameTestNamespaces', mod_id
+        }
+
+        data {
+            workingDirectory project.file('run-data')
+            property 'mixin.env.disable', 'true'
+            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    maven {
+        // temp
+        name 'Curse Maven'
+        url 'https://cursemaven.com'
+        content {
+            includeGroup 'curse.maven'
+        }
+    }
+    maven {
+        name 'Cloth Config'
+        url 'https://maven.shedaniel.me'
+        content {
+            includeGroup 'me.shedaniel.cloth'
+        }
+    }
+    maven {
+        name 'Curios API'
+        url 'https://maven.theillusivec4.top'
+        content {
+            includeGroup 'top.theillusivec4.curios'
+        }
+    }
+    maven {
+        name 'Accessories'
+        url 'https://maven.wispforest.io/releases'
+    }
+    maven {
+        name 'FFAPI for Accessories'
+        url 'https://maven.su5ed.dev/releases'
+    }
+    maven {
+        name 'Fabric API for Accessories'
+        url 'https://maven.fabricmc.net'
+    }
+    maven {
+        name 'Conditional Mixin'
+        url 'https://maven.fallenbreath.me/releases'
+        content {
+            includeGroup 'me.fallenbreath'
+        }
+    }
+    flatDir {
+        name 'Warium, Valkyrien Warium'
+        dir 'libs'
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
+    
+    jarJar(group: 'me.fallenbreath', name: 'conditional-mixin-forge', version: '[0.6.4]')
+    implementation fg.deobf("me.fallenbreath:conditional-mixin-forge:0.6.4")
+
+    api fg.deobf("me.shedaniel.cloth:cloth-config-forge:11.1.136")
+    
+    compileOnly fg.deobf("blank:Warium-${warium_version}:${warium_version}")
+
+    annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
+    
+    compileOnly fg.deobf("blank:Warium-${warium_version}:${warium_version}")
+
+    // compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.14.1+${mc_version}:api")
+
+    compileOnly fg.deobf("io.wispforest:accessories-neoforge:1.0.0-beta.47+${mc_version}")
+    compileOnly fg.deobf("io.wispforest:accessories-common:1.0.0-beta.47+${mc_version}-mojmap")
+
+    compileOnly fg.deobf("dev.su5ed.sinytra.fabric-api:fabric-api-base:0.4.31+ef105b4977"){
+        exclude group: "dev.su5ed.sinytra.fabric-api"
+    }
+}
+
+mixin {
+    add sourceSets.main, "${mod_id}.mixins.refmap.json"
+    config "${mod_id}.mixins.json"
+
+    debug.verbose = true
+    debug.export = true
+}
+
+modrinth {
+    token = System.getenv('MODRINTH_TOKEN')
+    projectId = mod_id
+    versionName = "${mod_name} ${version}"
+    versionType = 'beta'
+    uploadFile = "$buildDir/libs/${mod_id}-${mod_version}-all.jar"
+    gameVersions = [mc_version]
+    // dependencies {
+    //     required.project 'warium'
+    //     optional.version 'create', "${mc_version}-${create_version}"
+    //     optional.project 'cloth-config'
+    //     optional.project 'jei'
+    //     optional.project 'curios'
+    //     optional.project 'valkyrien-warium'
+    //     optional.project 'ponder'
+    //     optional.project 'immersiveengineering'
+    //     optional.project 'coloredwater'
+    //     optional.project 'supplementaries'
+    //     optional.version "create-tfmg", "0.9.3-${mc_version}"
+    //     optional.version "createaddition", "${mc_version}-1.2.5"
+    //     optional.version "create-diesel-generators", "${mc_version}-1.2i"
+    // }
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            mc_version: mc_version,
+            forge_version: forge_version,
+            loader_version_range: loader_version_range,
+            mod_group_id: mod_group_id,
+            mod_id: mod_id,
+            mod_name: mod_name,
+            mod_license: mod_license,
+            mod_version: mod_version,
+            mod_authors: mod_authors,
+            credits: credits,
+            mod_description: mod_description,
+            tests_directory: tests_directory,
+            warium_version: warium_version
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta', mod_id + '.mixins.json']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
+jarJar.enable()
+
+tasks.named('jar', Jar).configure {
+    dependsOn 'cleanLibs'
+    
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Vendor'   : mod_authors,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+
+    finalizedBy 'reobfJar'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ["-Xlint:-removal"]
+}
+
+tasks.register('cleanLibs', Delete) {
+    delete fileTree(dir: "$buildDir/libs", include: '*.jar')
+}
+
+tasks.register('copyModJar', Copy) {
+    dependsOn build
+    from("$buildDir/libs/") {
+        include '*-all.jar'
+    }
+    into tests_directory
+    onlyIf {
+        file(tests_directory).exists()
+    }
+}
+
+build.finalizedBy(copyModJar)

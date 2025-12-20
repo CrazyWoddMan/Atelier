@@ -1,0 +1,8 @@
+{
+  "type": "atelier:armor_plate",
+  "plate": {
+    "tag": "forge:plates/netherite"
+  },
+  "protection": 0.9,
+  "durability": 800
+}

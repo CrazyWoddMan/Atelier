@@ -1,0 +1,16 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "item": "atelier:phantom_silk",
+      "count": 8
+    }
+  ],
+  "spool": {
+    "tag": "forge:string",
+    "count": 8
+  },
+  "result": {
+    "item": "atelier:armor_vest_b"
+  }
+}

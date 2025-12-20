@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "${mod_group_id}.mixins",
+  "plugin": "${mod_group_id}.MixinPlugin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "${mod_id}.mixins.refmap.json",
+  "mixins": [
+    "PlateDamageMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

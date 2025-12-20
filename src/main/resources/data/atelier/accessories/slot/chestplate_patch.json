@@ -1,0 +1,6 @@
+{
+  "amount": 0,
+  "operation": "set",
+  "icon": "atelier:gui/slot/patch",
+  "drop_rule": "KEEP"
+}

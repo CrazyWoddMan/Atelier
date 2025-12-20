@@ -1,0 +1,18 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "tag": "forge:leather",
+      "count": 3
+    },
+    {
+      "tag": "forge:nuggets/gold"
+    }
+  ],
+  "spool": {
+    "tag": "forge:string"
+  },
+  "result": {
+    "item": "atelier:belt"
+  }
+}

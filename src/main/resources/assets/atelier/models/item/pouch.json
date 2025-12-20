@@ -1,0 +1,7 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0" : "atelier:item/pouch",
+		"layer1" : "atelier:item/pouch_overlay"
+	}
+}

@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ed ",
+	  "dfg",
+    "acb"
+  ],
+  "key": {
+    "a": {
+      "tag": "minecraft:planks"
+    },
+    "b": {
+      "item": "minecraft:chiseled_bookshelf"
+    },
+    "c": {
+      "item": "minecraft:iron_bars"
+    },
+    "d": {
+      "tag": "forge:ingots/iron"
+    },
+    "e": {
+      "tag": "forge:nuggets/gold"
+    },
+    "f": {
+      "item": "minecraft:tripwire_hook"
+    },
+    "g": {
+      "tag": "minecraft:wool_carpets"
+    }
+  },
+  "result": {
+    "item": "atelier:sewing_table"
+  }
+}

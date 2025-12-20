@@ -1,0 +1,20 @@
+{
+  "type": "atelier:patch_pos",
+  "slot": "chestplate_patch",
+  "parent": "chestplate",
+  "bodypart": "BODY",
+  "wearable": {
+    "item": "atelier:armor_vest_b"
+  },
+  "scale": 0.65,
+  "rotation": {
+    "x": 0,
+    "y": 180,
+    "z": 90
+  },
+  "translate": {
+    "x": -0.25,
+    "y": 0.24,
+    "z": 0.45
+  }
+}

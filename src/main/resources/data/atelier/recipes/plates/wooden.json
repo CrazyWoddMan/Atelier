@@ -1,0 +1,8 @@
+{
+  "type": "atelier:armor_plate",
+  "plate": {
+    "tag": "forge:plates/wood"
+  },
+  "protection": 0.2,
+  "durability": 30
+}

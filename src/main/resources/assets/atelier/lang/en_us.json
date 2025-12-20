@@ -1,0 +1,22 @@
+{	
+	"block.atelier.sewing_table": "Sewing Table",
+	"accessories.slot.armband": "Armband",
+	"accessories.slot.armor_plate": "Armor Plate",
+	"accessories.slot.chestplate_patch": "Chestplate Patch",
+	"accessories.slot.belt_pouch": "Pouch",
+	"commands.clear_slot_modifiers.success": "Successfully cleared Accessories attribute modifiers for %s",
+	"commands.clear_slot_modifiers.failed": "Failed to clear Accessories attribute modifiers for %s",
+	"commands.reset_accessories.success": "Successfully reset Accessories inventory for %s",
+	"commands.reset_accessories.failed": "Failed to reset Accessories inventory for %s",
+	"item.atelier.phantom_silk": "Phantom Silk",
+	"item.atelier.armor_vest_a": "Armor Vest A",
+	"item.atelier.armor_vest_b": "Armor Vest B",
+	"item.atelier.armor_vest_c": "Armor Vest C",
+	"item.atelier.belt": "Belt",
+	"item.atelier.pouch": "Pouch",
+	"item.atelier.wooden_plate": "Wooden Plate",
+	"item.atelier.iron_plate": "Iton Plate",
+	"item.atelier.ceramic_plate": "Ceramic Plate",
+	"item.atelier.netherite_plate": "Netherite Plate",
+	"itemGroup.atelier": "Atelier"
+}
