@@ -12,36 +12,26 @@ public abstract class PlateDamageMixin implements IForgeItem {
 
     @Override
     public int getMaxDamage(ItemStack stack) {
-        @SuppressWarnings("deprecation")
-        int damage = ((Item)(Object)this).getMaxDamage();
-        
-        return damage == 0 && AtelierRecipes.isPlate(stack.getItem())
-        ? AtelierRecipes
-            .getPlateRecipe(stack)
+        return AtelierRecipes
+            .getPlateRecipe(stack.getItem())
             .map(recipe ->
                 recipe
                 .getDurability()
-                .orElse(0)
+                .orElse(IForgeItem.super.getMaxDamage(stack))
             )
-            .orElse(0)
-        : damage;
+            .orElse(IForgeItem.super.getMaxDamage(stack));
     }
 
     @Override
     public boolean isDamageable(ItemStack stack) {
-        boolean damageable = ((Item)(Object)this).canBeDepleted();
-
-        return damageable || (
-            AtelierRecipes.isPlate(stack.getItem())
-            && AtelierRecipes
-                .getPlateRecipe(stack)
-                .map(recipe ->
-                    recipe
-                    .getDurability()
-                    .map(durabillity -> durabillity > 0)
-                    .orElse(false)
-                )
+        return IForgeItem.super.isDamageable(stack) || AtelierRecipes
+            .getPlateRecipe(stack.getItem())
+            .map(recipe ->
+                recipe
+                .getDurability()
+                .map(durabillity -> durabillity > 0)
                 .orElse(false)
-        );
+            )
+            .orElse(false);
     }
 }

@@ -8,7 +8,7 @@ import net.minecraft.world.item.Item;
 
 public interface IModular {
     static boolean isModular(Item item) {
-        return item instanceof IModular || AtelierItems.Tags.get(AtelierItems.Tags.PLATE_CARRIERS).contains(null) || AtelierRecipes.getPatchWearables().contains(item);
+        return item instanceof IModular || AtelierItems.Tags.get(AtelierItems.Tags.PLATE_CARRIERS).contains(null) || AtelierRecipes.isPatch(item);
     }
     /**
      * @return a map of module IDs and slots amount for this item. <b>MUST NOT INCLUDE PLATE MODULE!</b>

@@ -5,7 +5,6 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.world.item.ArmorItem;
 import crazywoddman.atelier.Atelier;
 import crazywoddman.atelier.api.templates.DyableArmor;
-import crazywoddman.atelier.items.AtelierItems.AtelierArmorMaterials;
 import crazywoddman.atelier.models.ArmorVestAModel;
 
 import java.util.function.Supplier;

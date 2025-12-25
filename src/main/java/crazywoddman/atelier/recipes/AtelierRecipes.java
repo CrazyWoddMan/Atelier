@@ -1,11 +1,8 @@
 package crazywoddman.atelier.recipes;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import crazywoddman.atelier.Atelier;
 import net.minecraft.core.registries.Registries;
@@ -38,8 +35,7 @@ public class AtelierRecipes {
     public static final RegistryObject<RecipeType<PatchRecipe>> PATCH_RECIPE_TYPE = 
         RECIPE_TYPES.register("patch_pos", () -> PatchRecipe.PatchRecipeType.INSTANCE);
 
-    private static final List<PlateRecipe> PLATE_RECIPES = new ArrayList<>();
-    private static final List<Item> PLATES = new ArrayList<>();
+    private static final Map<Item, PlateRecipe> PLATE_RECIPES = new HashMap<>();
     private static final Map<Item, String> PATCH_ITEMS = new HashMap<>();
 
     public static void reload(RecipeManager recipeManager) {
@@ -47,10 +43,8 @@ public class AtelierRecipes {
         PATCH_ITEMS.clear();
         
         recipeManager.getAllRecipesFor(PLATE_RECIPE_TYPE.get()).forEach(recipe -> {
-            PLATE_RECIPES.add(recipe);
-
             for (ItemStack stack : recipe.getPlate().getItems())
-                PLATES.add(stack.getItem());
+                PLATE_RECIPES.put(stack.getItem(), recipe);
         });
         recipeManager.getAllRecipesFor(PATCH_RECIPE_TYPE.get()).forEach(recipe -> {
             String slot = recipe.getSlot();
@@ -60,23 +54,31 @@ public class AtelierRecipes {
         });
     }
 
+    /**
+    * Should only be called after world initialization
+    */
     public static Optional<String> getPatchSlot(Item item) {
         return PATCH_ITEMS.containsKey(item) ? Optional.of(PATCH_ITEMS.get(item)) : Optional.empty();
     }
 
-    public static Set<Item> getPatchWearables() {
-        return PATCH_ITEMS.keySet();
+    /**
+    * Should only be called after world initialization
+    */
+    public static boolean isPatch(Item item) {
+        return PATCH_ITEMS.containsKey(item);
     }
 
-    public static Optional<PlateRecipe> getPlateRecipe(ItemStack stack) {
-        for (PlateRecipe recipe : PLATE_RECIPES)
-            if (recipe.matches(stack))
-                return Optional.of(recipe);
-
-        return Optional.empty();
+    /**
+    * Should only be called after world initialization
+    */
+    public static Optional<PlateRecipe> getPlateRecipe(Item item) {
+        return Optional.ofNullable(PLATE_RECIPES.get(item));
     }
 
+    /**
+    * Should only be called after world initialization
+    */
     public static boolean isPlate(Item item) {
-        return PLATES.contains(item);
+        return PLATE_RECIPES.containsKey(item);
     }
 }

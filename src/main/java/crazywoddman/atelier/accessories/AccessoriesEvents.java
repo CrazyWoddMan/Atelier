@@ -2,7 +2,6 @@ package crazywoddman.atelier.accessories;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -124,12 +123,11 @@ public class AccessoriesEvents {
         Item prevItem = prevStack.getItem();
         String eventSlot = reference.slotName();
         int index = reference.slot();
-        Set<Item> patch_wearables = AtelierRecipes.getPatchWearables();
 
         boolean newHasUniqueModules = newItem instanceof IModular;
         boolean prevHasUniqueModules = prevItem instanceof IModular;
-        boolean newIsPatchable = patch_wearables.contains(newItem);
-        boolean prevIsPatchable = patch_wearables.contains(prevItem);
+        boolean newIsPatchable = AtelierRecipes.isPatch(newItem);
+        boolean prevIsPatchable = AtelierRecipes.isPatch(prevItem);
 
         if (stateChange == SlotStateChange.REPLACEMENT && (newHasUniqueModules || prevHasUniqueModules || newIsPatchable || prevIsPatchable)) {
             AccessoriesCapability.getOptionally(entity).ifPresent(inventory -> {
@@ -200,14 +198,13 @@ public class AccessoriesEvents {
         Item newItem = newStack.getItem();
         Item prevItem = event.getFrom().getItem();
         ITag<Item> plate_carriers = AtelierItems.Tags.get(AtelierItems.Tags.PLATE_CARRIERS);
-        Set<Item> patch_wearables = AtelierRecipes.getPatchWearables();
 
         boolean newHasUniqueModules = newItem instanceof IModular;
         boolean prevHasUniqueModules = prevItem instanceof IModular;
         boolean newIsPlateCarrier = plate_carriers.contains(newItem);
         boolean prevIsPlateCarrier = plate_carriers.contains(prevItem);
-        boolean newIsPatchable = patch_wearables.contains(newItem);
-        boolean prevIsPatchable = patch_wearables.contains(prevItem);
+        boolean newIsPatchable = AtelierRecipes.isPatch(newItem);
+        boolean prevIsPatchable = AtelierRecipes.isPatch(prevItem);
 
 
         if (!(newHasUniqueModules || prevHasUniqueModules || newIsPlateCarrier || prevIsPlateCarrier || newIsPatchable || prevIsPatchable))
@@ -262,7 +259,7 @@ public class AccessoriesEvents {
         if (plate.isEmpty())
             return;
 
-        AtelierRecipes.getPlateRecipe(plate).ifPresent(recipe -> {
+        AtelierRecipes.getPlateRecipe(plate.getItem()).ifPresent(recipe -> {
             float damage = event.getAmount();
             float absorption = damage * recipe.getProtection();
             int itemDamage = plate.getDamageValue() + Math.round(absorption * 10);
