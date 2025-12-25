@@ -13,11 +13,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BundleItem;
 
 public class Pouch extends BundleItem implements IWearableAccessory, IDyable {
-    private final int defaultColor;
 
-    public Pouch(Properties properties, int defaultColor) {
-        super(properties);
-        this.defaultColor = defaultColor;
+    public Pouch() {
+        super(new Properties().stacksTo(4));
     }
 
     @Override
@@ -42,6 +40,6 @@ public class Pouch extends BundleItem implements IWearableAccessory, IDyable {
 
     @Override
     public int getDefaultColor() {
-        return defaultColor;
+        return 8606770;
     }
 }

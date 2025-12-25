@@ -2,7 +2,7 @@ package crazywoddman.atelier;
 
 import crazywoddman.atelier.accessories.AccessoriesEvents;
 import crazywoddman.atelier.accessories.PatchRenderer;
-import crazywoddman.atelier.api.WearablesRegisty;
+import crazywoddman.atelier.api.WearablesRegister;
 import crazywoddman.atelier.api.interfaces.IDyable;
 import crazywoddman.atelier.api.interfaces.IWearable;
 import crazywoddman.atelier.api.interfaces.IWearableAccessory;
@@ -93,7 +93,7 @@ public class Atelier {
                         ),
                         PatchRenderer::new
                     );
-                for (RegistryObject<Item> object : WearablesRegisty.getWearables()) {
+                for (RegistryObject<Item> object : WearablesRegister.ALL) {
                     Item item = object.get();
                     
                     if (item instanceof IWearableAccessory wearable)
@@ -117,7 +117,7 @@ public class Atelier {
 
         @SubscribeEvent
         public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
-            WearablesRegisty.getDyable().forEach(item -> {
+            for (RegistryObject<Item> item : WearablesRegister.DYABLE)
                 event.register(
                     (stack, layer) ->
                         layer == 0
@@ -125,12 +125,11 @@ public class Atelier {
                         : 16777215,
                     item.get()
                 );
-            });
         }
 
         @SubscribeEvent
         public static void registerLayerDefinitions(RegisterLayerDefinitions event) {
-            for (RegistryObject<Item> object : WearablesRegisty.getWearables()) {
+            for (RegistryObject<Item> object : WearablesRegister.ALL) {
                 if (object.get() instanceof IWearable wearable)
                     event.registerLayerDefinition(wearable.getLayerLocation(), wearable.createLayer());
             }

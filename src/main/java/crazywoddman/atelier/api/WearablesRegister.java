@@ -1,5 +1,7 @@
 package crazywoddman.atelier.api;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import crazywoddman.atelier.api.interfaces.IDyable;
@@ -11,6 +13,10 @@ import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 
 public class WearablesRegister {
+    public static final List<RegistryObject<Item>> ALL = new ArrayList<>();
+    public static final List<RegistryObject<Item>> DYABLE = new ArrayList<>();
+    public static final List<RegistryObject<Item>> MODULAR = new ArrayList<>();
+
     private final DeferredRegister<Item> REGISTRY;
 
     /**
@@ -26,19 +32,18 @@ public class WearablesRegister {
     public void register(IEventBus bus) {
         bus.addListener((RegisterEvent event) -> {
             if (event.getRegistryKey().equals(ForgeRegistries.Keys.ITEMS))
-                for (RegistryObject<Item> item : WearablesRegisty.ALL_ITEMS) {
+                for (RegistryObject<Item> item : ALL)
                     if (item.get() instanceof IDyable)
-                        WearablesRegisty.DYABLE_ITEMS.add(item);
-                }
+                        DYABLE.add(item);
         });
     }
 
     /**
     * Registers item in Forge DeferredRegister and Atelier wearables registry
     */
-    public RegistryObject<Item> register(String name, Supplier<? extends Item> supplier) {
+    public RegistryObject<Item> register(String name, Supplier<Item> supplier) {
         RegistryObject<Item> item = REGISTRY.register(name, supplier);
-        WearablesRegisty.ALL_ITEMS.add(item);
+        ALL.add(item);
 
         return item;
     }

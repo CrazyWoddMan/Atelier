@@ -21,8 +21,6 @@ public class BeltModel<T extends LivingEntity> extends EntityModel<T> {
 		ResourceLocation.fromNamespaceAndPath(Atelier.MODID, "belt"),
 		"main"
 	);
-	public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Atelier.MODID, "textures/models/wearable/belt.png");
-	public static final ResourceLocation OVERLAY = ResourceLocation.fromNamespaceAndPath(Atelier.MODID, "textures/models/wearable/belt_overlay.png");
 	public final ModelPart body;
 
 	public BeltModel(ModelPart root) {

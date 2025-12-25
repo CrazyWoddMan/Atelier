@@ -4,12 +4,8 @@ import java.util.function.Supplier;
 
 import crazywoddman.atelier.Atelier;
 import crazywoddman.atelier.api.WearablesRegister;
-import crazywoddman.atelier.api.templates.DyableArmor;
 import crazywoddman.atelier.api.templates.SimpleItem;
 import crazywoddman.atelier.blocks.AtelierBlocks;
-import crazywoddman.atelier.models.ArmorVestAModel;
-import crazywoddman.atelier.models.ArmorVestBModel;
-import crazywoddman.atelier.models.ArmorVestCModel;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +21,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -58,51 +53,27 @@ public class AtelierItems {
     );
     public static final RegistryObject<Item> ARMOR_VEST_A = WEARABLES.register(
         "armor_vest_a",
-        () -> new DyableArmor(
-            AtelierArmorMaterials.PHANTOM_SILK,
-            ArmorItem.Type.CHESTPLATE,
-            new Item.Properties(),
-            8618876,
-            FMLEnvironment.dist.isClient() ? ArmorVestAModel::createLayer : null,
-            FMLEnvironment.dist.isClient() ? ArmorVestAModel.LAYER_LOCATION : null,
-            Atelier.MODID + ":textures/models/wearable/armor_vest_a.png"
-        )
+        ArmorVestA::new
     );
     public static final RegistryObject<Item> ARMOR_VEST_B = WEARABLES.register(
         "armor_vest_b",
-        () -> new DyableArmor(
-            AtelierArmorMaterials.PHANTOM_SILK,
-            ArmorItem.Type.CHESTPLATE,
-            new Item.Properties(),
-            8618876,
-            FMLEnvironment.dist.isClient() ? ArmorVestBModel::createLayer : null,
-            FMLEnvironment.dist.isClient() ? ArmorVestBModel.LAYER_LOCATION : null,
-            Atelier.MODID + ":textures/models/wearable/armor_vest_b.png"
-        )
+        ArmorVestB::new
     );
     public static final RegistryObject<Item> ARMOR_VEST_C = WEARABLES.register(
         "armor_vest_c",
-        () -> new DyableArmor(
-            AtelierArmorMaterials.PHANTOM_SILK,
-            ArmorItem.Type.CHESTPLATE,
-            new Item.Properties(),
-            8618876,
-            FMLEnvironment.dist.isClient() ? ArmorVestCModel::createLayer : null,
-            FMLEnvironment.dist.isClient() ? ArmorVestCModel.LAYER_LOCATION : null,
-            Atelier.MODID + ":textures/models/wearable/armor_vest_c.png"
-        )
+        ArmorVestC::new
     );
     public static final RegistryObject<Item> BELT = WEARABLES.register(
         "belt",
-        () -> new Belt(new Item.Properties().stacksTo(4), 8606770)
+        Belt::new
     );
     public static final RegistryObject<Item> POUCH = WEARABLES.register(
         "pouch",
-        () -> new Pouch(new Item.Properties().stacksTo(4), 8606770)
+        Pouch::new
     );
     public static final RegistryObject<Item> ARMBAND = WEARABLES.register(
         "armband",
-        () -> new Armband(new Item.Properties().stacksTo(16), 16777215)
+        Armband::new
     );
 
     private static RegistryObject<Item> registerBlock(RegistryObject<Block> block) {

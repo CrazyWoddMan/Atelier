@@ -8,37 +8,27 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
-public class AccessoryWearable extends Item implements IWearableAccessory {
-    private final Supplier<LayerDefinition> layerSupplier;
-    private final ModelLayerLocation layerLocation;
+public abstract class AccessoryWearable extends Item implements IWearableAccessory {
     private final ResourceLocation texture;
     private final ResourceLocation overlay;
 
-    public AccessoryWearable(Properties properties, Supplier<LayerDefinition> layerSupplier, ModelLayerLocation layerLocation, ResourceLocation texture, ResourceLocation overlay) {
+    public AccessoryWearable(Properties properties, ResourceLocation texture, ResourceLocation overlay) {
         super(properties);
-        this.layerSupplier = layerSupplier;
-        this.layerLocation = layerLocation;
         this.texture = texture;
         this.overlay = overlay;
     }
 
-    public AccessoryWearable(Properties properties, Supplier<LayerDefinition> layerSupplier, ModelLayerLocation layerLocation, ResourceLocation texture) {
+    public AccessoryWearable(Properties properties, ResourceLocation texture) {
         super(properties);
-        this.layerSupplier = layerSupplier;
-        this.layerLocation = layerLocation;
         this.texture = texture;
         this.overlay = null;
     }
 
     @Override
-    public Supplier<LayerDefinition> createLayer() {
-        return this.layerSupplier;
-    }
+    public abstract Supplier<LayerDefinition> createLayer();
 
     @Override
-    public ModelLayerLocation getLayerLocation() {
-        return this.layerLocation;
-    }
+    public abstract ModelLayerLocation getLayerLocation();
 
     @Override
     public ResourceLocation getTextureLocation() {

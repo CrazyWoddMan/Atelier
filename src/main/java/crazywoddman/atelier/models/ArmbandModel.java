@@ -21,8 +21,6 @@ public class ArmbandModel<T extends LivingEntity> extends EntityModel<T> {
 		ResourceLocation.fromNamespaceAndPath(Atelier.MODID, "armband"),
 		"main"
 	);
-	public static final ResourceLocation LEFT_TEXTURE = ResourceLocation.fromNamespaceAndPath(Atelier.MODID, "textures/models/wearable/armband_left.png");
-	public static final ResourceLocation RIGHT_TEXTURE = ResourceLocation.fromNamespaceAndPath(Atelier.MODID, "textures/models/wearable/armband_right.png");
 	private final ModelPart left_arm;
 	private final ModelPart right_arm;
 

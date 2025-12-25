@@ -11,6 +11,7 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+
 import org.jetbrains.annotations.NotNull;
 
 import crazywoddman.atelier.Atelier;
@@ -20,40 +21,30 @@ import crazywoddman.atelier.api.interfaces.IWearable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class DyableArmor extends ArmorItem implements IWearable, IDyable {
+public abstract class DyableArmor extends ArmorItem implements IWearable, IDyable {
     private final int defaultColor;
-    private final Supplier<LayerDefinition> layerSupplier;
-    private final ModelLayerLocation layerLocation;
     private final String textureLocation;
     private final String overlayLocation;
 
-    public DyableArmor(ArmorMaterial material, Type type, Properties properties, int defaultColor, Supplier<LayerDefinition> layerSupplier, ModelLayerLocation layerLocation, String textureLocation) {
+    public DyableArmor(ArmorMaterial material, Type type, Properties properties, int defaultColor, String textureLocation) {
         super(material, type, properties);
         this.defaultColor = defaultColor;
-        this.layerSupplier = layerSupplier;
-        this.layerLocation = layerLocation;
         this.textureLocation = textureLocation;
         this.overlayLocation = Atelier.MODID + ":textures/empty.png";
     }
 
-    public DyableArmor(ArmorMaterial material, Type type, Properties properties, int defaultColor, Supplier<LayerDefinition> layerSupplier, ModelLayerLocation layerLocation, String textureLocation, String overlayLocation) {
+    public DyableArmor(ArmorMaterial material, Type type, Properties properties, int defaultColor, String textureLocation, String overlayLocation) {
         super(material, type, properties);
         this.defaultColor = defaultColor;
-        this.layerSupplier = layerSupplier;
-        this.layerLocation = layerLocation;
         this.textureLocation = textureLocation;
         this.overlayLocation = overlayLocation;
     }
 
     @Override
-    public Supplier<LayerDefinition> createLayer() {
-        return layerSupplier;
-    }
+    public abstract Supplier<LayerDefinition> createLayer();
 
     @Override
-    public ModelLayerLocation getLayerLocation() {
-        return layerLocation;
-    }
+    public abstract ModelLayerLocation getLayerLocation();
 
     @Override
     public int getDefaultColor() {
