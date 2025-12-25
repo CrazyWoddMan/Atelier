@@ -5,16 +5,17 @@ import java.util.Map;
 import crazywoddman.atelier.api.interfaces.IModular;
 import crazywoddman.atelier.api.templates.DyableAccessory;
 import crazywoddman.atelier.models.BeltModel;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 public class Belt extends DyableAccessory implements IModular {
     public Belt(Properties properties, int defaultColor) {
         super(
             properties,
             defaultColor,
-            BeltModel::createLayer,
-            BeltModel.LAYER_LOCATION,
-            BeltModel.TEXTURE,
-            BeltModel.OVERLAY
+            FMLEnvironment.dist.isClient() ? BeltModel::createLayer : null,
+            FMLEnvironment.dist.isClient() ? BeltModel.LAYER_LOCATION : null,
+            FMLEnvironment.dist.isClient() ? BeltModel.TEXTURE : null,
+            FMLEnvironment.dist.isClient() ? BeltModel.OVERLAY : null
         );
     }
 

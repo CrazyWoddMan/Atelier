@@ -25,6 +25,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -62,8 +63,8 @@ public class AtelierItems {
             ArmorItem.Type.CHESTPLATE,
             new Item.Properties(),
             8618876,
-            ArmorVestAModel::createLayer,
-            ArmorVestAModel.LAYER_LOCATION,
+            FMLEnvironment.dist.isClient() ? ArmorVestAModel::createLayer : null,
+            FMLEnvironment.dist.isClient() ? ArmorVestAModel.LAYER_LOCATION : null,
             Atelier.MODID + ":textures/models/wearable/armor_vest_a.png"
         )
     );
@@ -74,8 +75,8 @@ public class AtelierItems {
             ArmorItem.Type.CHESTPLATE,
             new Item.Properties(),
             8618876,
-            ArmorVestBModel::createLayer,
-            ArmorVestBModel.LAYER_LOCATION,
+            FMLEnvironment.dist.isClient() ? ArmorVestBModel::createLayer : null,
+            FMLEnvironment.dist.isClient() ? ArmorVestBModel.LAYER_LOCATION : null,
             Atelier.MODID + ":textures/models/wearable/armor_vest_b.png"
         )
     );
@@ -86,8 +87,8 @@ public class AtelierItems {
             ArmorItem.Type.CHESTPLATE,
             new Item.Properties(),
             8618876,
-            ArmorVestCModel::createLayer,
-            ArmorVestCModel.LAYER_LOCATION,
+            FMLEnvironment.dist.isClient() ? ArmorVestCModel::createLayer : null,
+            FMLEnvironment.dist.isClient() ? ArmorVestCModel.LAYER_LOCATION : null,
             Atelier.MODID + ":textures/models/wearable/armor_vest_c.png"
         )
     );
