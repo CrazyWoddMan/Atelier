@@ -37,7 +37,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
 import net.minecraftforge.common.brewing.IBrewingRecipe;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
@@ -101,7 +100,7 @@ public class Atelier {
         AtelierSounds.register(bus);
         AccessoriesEvents.register();
         MinecraftForge.EVENT_BUS.register(AccessoriesEvents.class);
-        context.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
+        Config.register(context);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

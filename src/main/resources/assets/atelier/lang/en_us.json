@@ -63,7 +63,7 @@
 	"atelier.config.bombVest": "Pouches explosion type",
 	"atelier.config.bombVest.desc0": "DISABLE: Pouches can't detonate",
 	"atelier.config.bombVest.desc1": "NO_DESTRUCTION: Explosion doesn't break blocks",
-	"atelier.config.bombVest.desc3": "ENABLE: Default explosion",
+	"atelier.config.bombVest.desc2": "ENABLE: Default explosion",
 	"atelier.config.bombVestMaxExplosionPower": "Max Pouches detonation power",
 	"atelier.config.bombVestMaxExplosionPower.desc0": "After this amount of explosive items",
 	"atelier.config.bombVestMaxExplosionPower.desc1": "explosion won't get more powerful",

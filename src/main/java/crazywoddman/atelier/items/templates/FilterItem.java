@@ -2,16 +2,13 @@ package crazywoddman.atelier.items.templates;
 
 import java.util.List;
 import crazywoddman.atelier.Atelier;
-import crazywoddman.atelier.AtelierSounds;
+import crazywoddman.atelier.AtelierClientUtils;
 import crazywoddman.atelier.api.templates.DyableAccessory;
 import crazywoddman.atelier.effects.AtelierEffects;
 import io.wispforest.accessories.api.AccessoriesAPI;
 import io.wispforest.accessories.api.SoundEventData;
 import io.wispforest.accessories.api.slot.SlotReference;
-import io.wispforest.accessories.api.slot.SlotTypeReference;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -19,7 +16,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -28,8 +24,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -132,7 +126,7 @@ public abstract class FilterItem extends DyableAccessory {
         LivingEntity entity = reference.entity();
 
         if (entity.level().isClientSide && entity.canDrownInFluidType(ForgeMod.WATER_TYPE.get()) && entity.tickCount % 60 == 0)
-            Minecraft.getInstance().getSoundManager().play(new FilterBreathingSound(entity, reference));
+            AtelierClientUtils.playFilterSound(reference);
                 
         if (!(entity instanceof ServerPlayer serverPlayer) || entity.tickCount % 20 != 0 || serverPlayer.isSpectator())
             return;
@@ -157,32 +151,5 @@ public abstract class FilterItem extends DyableAccessory {
     @Override
     public SoundEventData getEquipSound() {
         return new SoundEventData(SoundEvents.ARMOR_EQUIP_GOLD, 1, 1);
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    private static class FilterBreathingSound extends EntityBoundSoundInstance {
-        private final LivingEntity entity;
-        private final SlotReference reference;
-
-        public FilterBreathingSound(LivingEntity entity, SlotReference reference) {
-            super(
-                AtelierSounds.GASMASK.get(),
-                SoundSource.PLAYERS,
-                1,
-                0.85f + entity.getRandom().nextFloat() * 0.05f,
-                entity,
-                entity.level().getRandom().nextLong()
-            );
-            this.entity = entity;
-            this.reference = reference;
-        }
-
-        @Override
-        public void tick() {
-            super.tick();
-            
-            if (this.entity == null || !this.entity.isAlive() || reference.getStack().isEmpty() || !reference.capability().getContainer(new SlotTypeReference("face")).shouldRender(0) || !reference.slotContainer().shouldRender(reference.slot()) || this.entity.isUnderWater())
-                stop();
-        }
     }
 }

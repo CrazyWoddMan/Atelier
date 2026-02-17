@@ -1,17 +1,13 @@
 package crazywoddman.atelier.items.simple;
 
 import crazywoddman.atelier.Atelier;
-import crazywoddman.atelier.AtelierSounds;
+import crazywoddman.atelier.AtelierClientUtils;
 import crazywoddman.atelier.AtelierTags;
 import crazywoddman.atelier.api.templates.SimpleItem;
 import crazywoddman.atelier.config.Config;
 import crazywoddman.atelier.items.AtelierItems;
 import io.wispforest.accessories.api.AccessoriesCapability;
 import io.wispforest.accessories.api.slot.SlotEntryReference;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.resources.sounds.SoundInstance.Attenuation;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.sounds.SoundEvents;
@@ -67,27 +63,7 @@ public class Detonator extends SimpleItem {
             if (count > 0) {
                 if (level.isClientSide && !Atelier.Queue.hasTask(player, "boom")) {
                     Atelier.Queue.addToQueue(player, "boom", () -> {}, 45);
-                    Minecraft.getInstance().getSoundManager().play(
-                        player.isLocalPlayer()
-                        ? new SimpleSoundInstance(
-                            (Config.SERVER.halalMode.get() ? AtelierSounds.HALAL : AtelierSounds.DETONATION).getId(),
-                            SoundSource.PLAYERS,
-                            1, 1,
-                            level.getRandom(),
-                            false,
-                            0,
-                            Attenuation.NONE,
-                            0, 0, 0,
-                            true
-                        ) : new EntityBoundSoundInstance(
-                            (Config.SERVER.halalMode.get() ? AtelierSounds.HALAL : AtelierSounds.DETONATION).get(),
-                            SoundSource.PLAYERS,
-                            1,
-                            1,
-                            player,
-                            level.getRandom().nextLong()
-                        )
-                    );
+                    AtelierClientUtils.playeDetonationSound(player);
                 } else {
                     float power = 3 + (float)Math.pow(Math.min(count, Config.SERVER.bombVestMaxExplosionPower.get()), 0.7);
                     Atelier.Queue.addToQueue(player, "boom", () ->

@@ -58,7 +58,7 @@
     "atelier.config.bombVest": "Тип взрыва подсумков",
     "atelier.config.bombVest.desc0": "DISABLE: Подсумки не могут сдетонировать",
     "atelier.config.bombVest.desc1": "NO_DESTRUCTION: Взрыв не разрушает блоки",
-    "atelier.config.bombVest.desc3": "ENABLE: Обычный взрыв",
+    "atelier.config.bombVest.desc2": "ENABLE: Обычный взрыв",
     "atelier.config.bombVestMaxExplosionPower": "Максимальная мощность взрыва подсумков",
     "atelier.config.bombVestMaxExplosionPower.desc0": "После этого количества взрывчатки",
     "atelier.config.bombVestMaxExplosionPower.desc1": "взрыв не станет мощнее",

@@ -58,7 +58,7 @@
     "atelier.config.bombVest": "Тип вибуху підсумків",
     "atelier.config.bombVest.desc0": "DISABLE: Підсумки не можуть вибухнути",
     "atelier.config.bombVest.desc1": "NO_DESTRUCTION: Вибух не руйнує блоки",
-    "atelier.config.bombVest.desc3": "ENABLE: Звичайний вибух",
+    "atelier.config.bombVest.desc2": "ENABLE: Звичайний вибух",
     "atelier.config.bombVestMaxExplosionPower": "Максимальна потужність вибуху підсумків",
     "atelier.config.bombVestMaxExplosionPower.desc0": "Після цієї кількості вибухівки",
     "atelier.config.bombVestMaxExplosionPower.desc1": "вибух не стане потужнішим",
