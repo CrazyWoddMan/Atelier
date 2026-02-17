@@ -1,0 +1,15 @@
+{
+  "type": "atelier:module",
+  "module": "patch",
+  "wearable": {
+    "tag": "atelier:fabric"
+  },
+  "variants": [
+    {
+      "bodypart": "HEAD",
+      "scale": -1,
+      "rotation": [180, 180, 90],
+      "translate": [0.25, -0.36, 0.55]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "amount": 0,
+  "order": 899,
+  "operation": "set",
+  "icon": "atelier:gui/slot/gas_filter",
+  "drop_rule": "KEEP"
+}

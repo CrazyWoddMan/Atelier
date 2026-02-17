@@ -2,8 +2,7 @@
   "type": "atelier:sewing_table",
   "ingredients": [
     {
-      "tag": "forge:leather",
-      "count": 2
+      "tag": "forge:leather"
     },
     {
       "tag": "forge:nuggets/gold"

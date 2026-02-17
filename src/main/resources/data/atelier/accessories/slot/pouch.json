@@ -1,0 +1,7 @@
+{
+  "amount": 0,
+  "operation": "set",
+  "order": 800,
+  "icon": "atelier:gui/slot/pouch",
+  "drop_rule": "KEEP"
+}

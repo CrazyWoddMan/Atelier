@@ -1,7 +1,7 @@
 package crazywoddman.atelier.api;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import crazywoddman.atelier.api.interfaces.IDyable;
@@ -13,9 +13,9 @@ import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 
 public class WearablesRegister {
-    public static final List<RegistryObject<Item>> ALL = new ArrayList<>();
-    public static final List<RegistryObject<Item>> DYABLE = new ArrayList<>();
-    public static final List<RegistryObject<Item>> MODULAR = new ArrayList<>();
+    public static final Set<RegistryObject<Item>> ALL = new HashSet<>();
+    public static final Set<RegistryObject<Item>> DYABLE = new HashSet<>();
+    public static final Set<RegistryObject<Item>> MODULAR = new HashSet<>();
 
     private final DeferredRegister<Item> REGISTRY;
 

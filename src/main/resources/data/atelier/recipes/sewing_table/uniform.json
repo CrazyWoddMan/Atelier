@@ -1,0 +1,16 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "item": "atelier:fabric",
+      "count": 8
+    }
+  ],
+  "spool": {
+    "tag": "forge:string",
+    "count": 8
+  },
+  "result": {
+    "item": "atelier:uniform"
+  }
+}

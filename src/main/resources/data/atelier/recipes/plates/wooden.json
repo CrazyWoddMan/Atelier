@@ -3,6 +3,6 @@
   "plate": {
     "tag": "forge:plates/wood"
   },
-  "protection": 0.2,
-  "durability": 30
+  "protection": 1,
+  "durability": 25
 }

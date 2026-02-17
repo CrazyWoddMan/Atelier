@@ -3,6 +3,6 @@
   "plate": {
     "tag": "forge:plates/steel"
   },
-  "protection": 0.8,
-  "durability": 500
+  "protection": 4,
+  "durability": 150
 }

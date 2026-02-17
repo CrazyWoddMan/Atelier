@@ -1,0 +1,11 @@
+{
+  "values": [
+    "#atelier:can_detonate_fire",
+    "minecraft:tnt",
+    "minecraft:tnt_minecart",
+    {
+      "id": "crusty_chunks:artillery_shell",
+      "required": false
+    }
+  ]
+}

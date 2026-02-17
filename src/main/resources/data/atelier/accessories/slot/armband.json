@@ -1,5 +1,6 @@
 {
   "amount": 2,
   "operation": "set",
+  "order": 900,
   "icon": "atelier:gui/slot/armband"
 }

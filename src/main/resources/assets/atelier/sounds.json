@@ -1,0 +1,20 @@
+{
+  "detonation": {
+    "subtitle": "subtitles.entity.tnt.primed",
+    "sounds": ["atelier:detonation"]
+  },
+  "halal": {
+    "subtitle": "subtitles.arabic_singing",
+    "sounds": ["atelier:halal"]
+  },
+  "gasmask": {
+    "subtitle": "subtitles.gasmask.breathing",
+    "sounds": ["atelier:gasmask"]
+  },
+  "gotta_move": {
+    "sounds": ["atelier:gotta_move"]
+  },
+  "sewing_machine": {
+    "sounds": ["atelier:sewing_machine"]
+  }
+}

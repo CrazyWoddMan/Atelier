@@ -1,0 +1,11 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "tag": "forge:leather"
+    }
+  ],
+  "result": {
+    "item": "atelier:leather_glove"
+  }
+}

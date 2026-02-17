@@ -1,0 +1,21 @@
+{
+  "type": "atelier:module",
+  "module": "patch",
+  "wearable": {
+    "item": "atelier:uniform"
+  },
+  "variants": [
+    {
+      "bodypart": "RIGHT_ARM",
+      "scale": 0.6,
+      "rotation": [90, 0, -90],
+      "translate": [-0.13, 0.775, 0]
+    },
+    {
+      "bodypart": "LEFT_ARM",
+      "scale": -0.6,
+      "rotation": [-90, 0, -90],
+      "translate": [0.13, 0.775, 0]
+    }
+  ]
+}

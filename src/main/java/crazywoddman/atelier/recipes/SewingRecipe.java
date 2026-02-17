@@ -21,9 +21,9 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 
 public class SewingRecipe implements Recipe<Container> {
     private final ResourceLocation id;
-    private final ItemStack result;
-    private final NonNullList<CountableIngredient> ingredients;
-    private final CountableIngredient spool;
+    public final ItemStack result;
+    public final NonNullList<CountableIngredient> ingredients;
+    public final CountableIngredient spool;
 
     public SewingRecipe(
         ResourceLocation id,
@@ -57,7 +57,7 @@ public class SewingRecipe implements Recipe<Container> {
 
     @Override
     public ItemStack getResultItem(RegistryAccess registryAccess) {
-        return result;
+        return result.copy();
     }
 
     @Override
@@ -67,20 +67,12 @@ public class SewingRecipe implements Recipe<Container> {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return SewingRecipeSerializer.INSTANCE;
+        return AtelierRecipes.SEWING_RECIPE_SERIALIZER.get();
     }
 
     @Override
     public RecipeType<?> getType() {
-        return SewingRecipeType.INSTANCE;
-    }
-
-    public NonNullList<CountableIngredient> getCountableIngredients() {
-        return ingredients;
-    }
-
-    public CountableIngredient getSpool() {
-        return spool;
+        return AtelierRecipes.SEWING_RECIPE_TYPE.get();
     }
 
     @Override
@@ -164,27 +156,20 @@ public class SewingRecipe implements Recipe<Container> {
         }
     }
 
-    public static class SewingRecipeType implements RecipeType<SewingRecipe> {
-        public static final SewingRecipeType INSTANCE = new SewingRecipeType();
-    }
-
-    public static class SewingRecipeSerializer implements RecipeSerializer<SewingRecipe> {
-        public static final SewingRecipeSerializer INSTANCE = new SewingRecipeSerializer();
+    public static class Type implements RecipeType<SewingRecipe> {}
+    public static class Serializer implements RecipeSerializer<SewingRecipe> {
 
         @Override
         public SewingRecipe fromJson(ResourceLocation id, JsonObject json) {
             JsonArray ingredientsJson = GsonHelper.getAsJsonArray(json, "ingredients");
             
-            if (ingredientsJson.size() < 1 || ingredientsJson.size() > 9)
-                throw new JsonParseException("Sewing recipe must have 1-9 ingredients, found: " + ingredientsJson.size());
+            if (ingredientsJson.size() > 9)
+                throw new JsonParseException("Sewing recipe must have 0-9 ingredients, found: " + ingredientsJson.size());
             
             NonNullList<CountableIngredient> ingredients = NonNullList.create();
             
             for (int i = 0; i < ingredientsJson.size(); i++)
                 ingredients.add(CountableIngredient.fromJson(ingredientsJson.get(i)));
-
-            if (ingredients.isEmpty())
-                throw new JsonParseException("No valid ingredients for sewing recipe");
 
             return new SewingRecipe(
                 id,

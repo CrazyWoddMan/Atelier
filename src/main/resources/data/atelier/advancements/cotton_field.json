@@ -1,0 +1,46 @@
+{
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "terrablender"
+    }
+  ],
+  "display": {
+    "icon": {
+      "item": "atelier:wild_cotton"
+    },
+    "title": {
+      "translate": "advancements.atelier.cotton_field.title"
+    },
+    "description": {
+      "translate": "advancements.atelier.cotton_field.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "minecraft:adventure/root",
+  "criteria": {
+    "atelier:cotton_field": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "location": {
+                "biome": "atelier:cotton_field"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "atelier:cotton_field"
+    ]
+  ]
+}

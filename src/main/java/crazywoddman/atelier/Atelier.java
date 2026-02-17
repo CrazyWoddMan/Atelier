@@ -1,36 +1,43 @@
 package crazywoddman.atelier;
 
-import crazywoddman.atelier.accessories.AccessoriesEvents;
-import crazywoddman.atelier.accessories.PatchRenderer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
+
 import crazywoddman.atelier.api.WearablesRegister;
-import crazywoddman.atelier.api.interfaces.IDyable;
-import crazywoddman.atelier.api.interfaces.IWearable;
-import crazywoddman.atelier.api.interfaces.IWearableAccessory;
 import crazywoddman.atelier.blocks.AtelierBlockEntities;
 import crazywoddman.atelier.blocks.AtelierBlocks;
-import crazywoddman.atelier.config.ClothConfig;
+import crazywoddman.atelier.compat.terrablender.CottonField;
 import crazywoddman.atelier.config.Config;
+import crazywoddman.atelier.effects.AtelierEffects;
+import crazywoddman.atelier.events.AccessoriesEvents;
 import crazywoddman.atelier.gui.AtelierMenuTypes;
-import crazywoddman.atelier.gui.SewingTableScreen;
 import crazywoddman.atelier.items.AtelierItems;
+import crazywoddman.atelier.network.NetworkHandler;
 import crazywoddman.atelier.recipes.AtelierRecipes;
 import io.wispforest.accessories.api.AccessoriesAPI;
-import io.wispforest.accessories.api.client.AccessoriesRendererRegistry;
+import io.wispforest.accessories.api.Accessory;
 import io.wispforest.accessories.api.slot.SlotBasedPredicate;
-import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.PotionItem;
+import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.client.event.EntityRenderersEvent.RegisterLayerDefinitions;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
+import net.minecraftforge.common.brewing.IBrewingRecipe;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
@@ -40,113 +47,198 @@ import net.minecraftforge.registries.RegistryObject;
 
 @Mod(Atelier.MODID)
 public class Atelier {
+    private static class FilterBrewing implements IBrewingRecipe {
+        private final Predicate<CompoundTag> input;
+        private final Predicate<ItemStack> ingredient;
+        private final BiConsumer<CompoundTag, CompoundTag> result;
+        private FilterBrewing(Predicate<CompoundTag> input, Predicate<ItemStack> ingredient, BiConsumer<CompoundTag, CompoundTag> result) {
+            this.input = input;
+            this.ingredient = ingredient;
+            this.result = result;
+        }
+
+        @Override
+        public boolean isInput(ItemStack input) {
+            return input.is(AtelierTags.Items.GAS_FILTERS) ? this.input.test(input.getTag()) : false;
+        }
+
+        @Override
+        public boolean isIngredient(ItemStack ingredient) {
+            return this.ingredient.test(ingredient);
+        }
+
+        @Override
+        public ItemStack getOutput(ItemStack input, ItemStack ingredient) {
+            if (!isInput(input) || !isIngredient(ingredient))
+                return  ItemStack.EMPTY;
+            
+            ItemStack result = input.copy();
+            this.result.accept(result.getOrCreateTag(), ingredient.getTag());
+            return result;
+        }
+        
+    }
     public static final String MODID = "atelier";
 
-    protected static final ModList modlist = ModList.get();
+    private static final ModList modlist = ModList.get();
     public static final boolean cloth_config = modlist.isLoaded("cloth_config");
-    public static final boolean accessories = modlist.isLoaded("accessories");
-    public static final boolean curios = modlist.isLoaded("curios");
     public static final boolean warium = modlist.isLoaded("crusty_chunks");
+    public static final boolean jei = modlist.isLoaded("jei");
+    public static final boolean terrablender = modlist.isLoaded("terrablender");
 
     public Atelier(FMLJavaModLoadingContext context) {
         IEventBus bus = context.getModEventBus();
 
         bus.addListener(this::commonSetup);
         
-        AtelierItems.REGISTRY.register(bus);
-        AtelierItems.WEARABLES.register(bus);
-        AtelierItems.CREATIVE_TABS.register(bus);
-        AtelierBlocks.REGISTRY.register(bus);
-        AtelierBlockEntities.REGISTRY.register(bus);
-        AtelierMenuTypes.REGISTRY.register(bus);
-        AtelierRecipes.RECIPE_SERIALIZERS.register(bus);
-        AtelierRecipes.RECIPE_TYPES.register(bus);
+        NetworkHandler.register();
+        AtelierItems.register(bus);
+        AtelierBlocks.register(bus);
+        AtelierBlockEntities.register(bus);
+        AtelierMenuTypes.register(bus);
+        AtelierRecipes.register(bus);
+        AtelierEffects.register(bus);
+        AtelierSounds.register(bus);
         AccessoriesEvents.register();
         MinecraftForge.EVENT_BUS.register(AccessoriesEvents.class);
-
-        if (cloth_config)
-            context.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
+        context.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
+            if (terrablender)
+                CottonField.register();
+
+            BrewingRecipeRegistry.addRecipe(new FilterBrewing(
+                input -> input == null || (!input.getBoolean("isPrepared") && !input.contains("effects")),
+                ingredient -> ingredient.is(Items.MILK_BUCKET),
+                (input, ingredient) -> input.putBoolean("isPrepared", true)
+            ));
+            BrewingRecipeRegistry.addRecipe(new FilterBrewing(
+                input -> input != null && input.getBoolean("isPrepared"),
+                ingredient -> ingredient.getItem() instanceof PotionItem && AtelierTags.Potions.get(AtelierTags.Potions.GAS_FILTER).contains(PotionUtils.getPotion(ingredient)),
+                (input, ingredient) -> {
+                    input.remove("isPrepared");
+                    ListTag effects = new ListTag();
+
+                    for (MobEffectInstance effect : PotionUtils.getAllEffects(ingredient))
+                        effects.add(StringTag.valueOf(ForgeRegistries.MOB_EFFECTS.getKey(effect.getEffect()).toString()));
+
+                    input.put("effects", effects);
+                }
+            ));
+            BrewingRecipeRegistry.addRecipe(new FilterBrewing(
+                input -> input != null && input.getBoolean("isPrepared"),
+                ingredient -> ingredient.is(Items.WITHER_ROSE),
+                (input, ingredient) -> {
+                    input.remove("isPrepared");
+                    ListTag effects = new ListTag();
+                    effects.add(StringTag.valueOf("minecraft:wither"));
+                    input.put("effects", effects);
+                }
+            ));
             AccessoriesAPI.registerPredicate(
                 ResourceLocation.fromNamespaceAndPath(Atelier.MODID, "armor_plate"),
-                SlotBasedPredicate.ofItem(item -> 
-                    AtelierRecipes.isPlate(item)
-                )
+                SlotBasedPredicate.ofItem(AtelierRecipes::isPlate)
             );
+
+            for (RegistryObject<Item> registry : WearablesRegister.ALL) {
+                Item item = registry.get();
+
+                if (item instanceof Accessory accessory)
+                    AccessoriesAPI.registerAccessory(item, accessory);
+            }
         });
     }
 
-    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientSetupEvents {
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event) {
-            event.enqueueWork(() -> {
-                MenuScreens.register(AtelierMenuTypes.SEWING_TABLE.get(), SewingTableScreen::new);
+    public static class Queue {
+        private static Map<LivingEntity, List<DelayedRunnable>> SERVER = new HashMap<>();
+        private static Map<LivingEntity, Map<String, DelayedRunnable>> SERVER_NAMED = new HashMap<>();
+        private static Map<LivingEntity, List<DelayedRunnable>> CLIENT = new HashMap<>();
+        private static Map<LivingEntity, Map<String, DelayedRunnable>> CLIENT_NAMED = new HashMap<>();
 
-                for (DyeColor color : DyeColor.values())
-                    AccessoriesRendererRegistry.registerRenderer(
-                        ForgeRegistries.ITEMS.getValue(
-                            ResourceLocation.fromNamespaceAndPath("minecraft", color.getName() + "_banner")
-                        ),
-                        PatchRenderer::new
-                    );
-                for (RegistryObject<Item> object : WearablesRegister.ALL) {
-                    Item item = object.get();
-                    
-                    if (item instanceof IWearableAccessory wearable)
-                        AccessoriesRendererRegistry.registerRenderer(
-                            item,
-                            wearable.getRenderer()
-                        );
+        public static boolean hasTask(LivingEntity entity, String task) {
+            Map<String, DelayedRunnable> runnables = (entity.level().isClientSide ? CLIENT_NAMED : SERVER_NAMED).get(entity);
+            return runnables == null ? false : runnables.containsKey(task);
+        }
+
+        public static void addToQueue(LivingEntity entity, Runnable runnable, int tickDelay) {
+            Map<LivingEntity, List<DelayedRunnable>> queue = entity.level().isClientSide ? Queue.CLIENT : Queue.SERVER;
+            
+            if (!queue.containsKey(entity))
+                queue.put(entity, new ArrayList<>());
+            
+            queue.get(entity).add(new DelayedRunnable(runnable, tickDelay));
+        }
+
+        public static void addToQueue(LivingEntity entity, Runnable runnable) {
+            addToQueue(entity, runnable, 0);
+        }
+
+        public static void addToQueue(LivingEntity entity, String name, Runnable runnable, int tickDelay) {
+            Map<LivingEntity, Map<String, DelayedRunnable>> queue = entity.level().isClientSide ? Queue.CLIENT_NAMED : Queue.SERVER_NAMED;
+
+            if (!queue.containsKey(entity))
+                queue.put(entity, new LinkedHashMap<>());
+
+            Map<String, DelayedRunnable> subqueue = queue.get(entity);
+
+            if (!subqueue.containsKey(name))
+                subqueue.put(name, new DelayedRunnable(runnable, tickDelay));
+        }
+
+        public static void addToQueue(LivingEntity entity, String name, Runnable runnable) {
+            addToQueue(entity, name, runnable, 0);
+        }
+
+        public static void runQueue(LivingEntity entity) {
+            boolean isClient = entity.level().isClientSide;
+            List<DelayedRunnable> runnables = (isClient ? Queue.CLIENT : Queue.SERVER).get(entity);
+
+            if (runnables != null) {
+                for (int i = 0; i < runnables.size();) {
+                    DelayedRunnable runnable = runnables.get(i);
+
+                    if (runnable.delay == 0) {
+                        runnable.runnable.run();
+                        runnables.remove(i);
+                    } else {
+                        runnable.delay--;
+                        i++;
+                    }
                 }
-                
-                if (modlist.isLoaded("cloth_config"))
-                    ClothConfig.registerConfigScreen();
-            });
-        }
 
-        @SubscribeEvent
-        public static void onBuildCreativeTab(BuildCreativeModeTabContentsEvent event) {
-            if (event.getTab() == AtelierItems.CREATIVE_TAB.get())
-                for (RegistryObject<Item> item : AtelierItems.REGISTRY.getEntries())
-                    event.accept(item.get());
-        }
+                if (runnables.isEmpty())
+                    (isClient ? Queue.CLIENT : Queue.SERVER).remove(entity);
+            }
 
-        @SubscribeEvent
-        public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
-            for (RegistryObject<Item> item : WearablesRegister.DYABLE)
-                event.register(
-                    (stack, layer) ->
-                        layer == 0
-                        ? ((IDyable)stack.getItem()).getColor(stack)
-                        : 16777215,
-                    item.get()
-                );
-        }
+            Map<String, DelayedRunnable> namedRunnables = (isClient ? Queue.CLIENT_NAMED : Queue.SERVER_NAMED).get(entity);
 
-        @SubscribeEvent
-        public static void registerLayerDefinitions(RegisterLayerDefinitions event) {
-            for (RegistryObject<Item> object : WearablesRegister.ALL) {
-                if (object.get() instanceof IWearable wearable)
-                    event.registerLayerDefinition(wearable.getLayerLocation(), wearable.createLayer());
+            if (namedRunnables != null) {
+                for (String name : namedRunnables.keySet()) {
+                    DelayedRunnable runnable = namedRunnables.get(name);
+
+                    if (runnable.delay == 0) {
+                        runnable.runnable.run();
+                        namedRunnables.remove(name);
+                    }
+                    else
+                        runnable.delay--;
+                }
+
+                if (namedRunnables.isEmpty())
+                    (isClient ? Queue.CLIENT_NAMED : Queue.SERVER_NAMED).remove(entity);
             }
         }
-    }
 
-    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-    public static class ForgeEvents {
+        public static class DelayedRunnable {
+            public final Runnable runnable;
+            public int delay;
 
-        @SubscribeEvent
-        public static void onServerStarted(ServerStartedEvent event) {
-            AtelierRecipes.reload(event.getServer().getRecipeManager());
-        }
-
-        @SubscribeEvent
-        public static void onCommandRegister(net.minecraftforge.event.RegisterCommandsEvent event) {
-            AtelierCommands.register(event.getDispatcher());
+            private DelayedRunnable(Runnable runnable, int tickDelay) {
+                this.runnable = runnable;
+                this.delay = tickDelay;
+            }
         }
     }
 }

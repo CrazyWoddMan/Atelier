@@ -12,7 +12,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 public enum AtelierArmorMaterials implements ArmorMaterial {
     PHANTOM_SILK(
         AtelierItems.PHANTOM_SILK.getId().getPath(),
-        15,
+        6,
         new int[]{1, 3, 4, 1}, // Protection: boots, leggings, chestplate, helmmet
         15,
         SoundEvents.ARMOR_EQUIP_LEATHER,

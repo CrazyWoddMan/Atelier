@@ -3,6 +3,6 @@
   "plate": {
     "tag": "forge:plates/ceramic"
   },
-  "protection": 0.7,
-  "durability": 200
+  "protection": 4,
+  "durability": 50
 }

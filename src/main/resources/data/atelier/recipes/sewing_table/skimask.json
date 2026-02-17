@@ -1,0 +1,11 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "tag": "minecraft:wool"
+    }
+  ],
+  "result": {
+    "item": "atelier:skimask"
+  }
+}

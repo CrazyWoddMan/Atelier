@@ -1,0 +1,21 @@
+{
+  "type": "atelier:module",
+  "module": "pouch",
+  "wearable": {
+    "item": "atelier:belt"
+  },
+  "variants": [
+    {
+      "bodypart": "BODY",
+      "scale": 4,
+      "rotation": [180, 0, 0],
+      "translate": [0, 3.75, 0]
+    },
+    {
+      "bodypart": "BODY",
+      "scale": 4,
+      "rotation": [180, 0, 0],
+      "translate": [0.625, 3.75, 0]
+    }
+  ]
+}

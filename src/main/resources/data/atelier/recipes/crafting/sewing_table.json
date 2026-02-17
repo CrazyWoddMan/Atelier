@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "ed ",
+    "edh",
 	  "dfg",
     "acb"
   ],
@@ -27,6 +27,9 @@
     },
     "g": {
       "tag": "minecraft:wool_carpets"
+    },
+    "h": {
+      "tag": "forge:shears"
     }
   },
   "result": {

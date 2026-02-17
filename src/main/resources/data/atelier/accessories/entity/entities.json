@@ -1,4 +1,0 @@
-{
-  "entities": ["#accessories:defaulted_targets"],
-  "slots": ["armor_plate", "chestplate_patch", "belt_pouch", "armband"]
-}

@@ -6,7 +6,9 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "${mod_id}.mixins.refmap.json",
   "mixins": [
-    "PlateDamageMixin"
+    "PlateDamageMixin",
+    "FakingGasMaskMixin",
+    "GrassBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

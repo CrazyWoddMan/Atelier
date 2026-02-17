@@ -1,0 +1,19 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "item": "atelier:phantom_silk",
+      "count": 5
+    },
+    {
+      "item": "minecraft:iron_helmet"
+    }
+  ],
+  "spool": {
+    "tag": "forge:string",
+    "count": 5
+  },
+  "result": {
+    "item": "atelier:tactical_helmet_a"
+  }
+}

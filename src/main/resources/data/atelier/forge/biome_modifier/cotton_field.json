@@ -1,0 +1,6 @@
+{
+  "type": "forge:add_features",
+  "biomes": "atelier:cotton_field",
+  "features": "atelier:cotton_field",
+  "step": "vegetal_decoration"
+}

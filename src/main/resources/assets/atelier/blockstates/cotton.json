@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "age=0": {
+      "model": "atelier:block/cotton/cotton_stage0"
+    },
+    "age=1": {
+      "model": "atelier:block/cotton/cotton_stage0"
+    },
+    "age=2": {
+      "model": "atelier:block/cotton/cotton_stage1"
+    },
+    "age=3": {
+      "model": "atelier:block/cotton/cotton_stage2"
+    },
+    "age=4": {
+      "model": "atelier:block/cotton/cotton_stage2"
+    },
+    "age=5": {
+      "model": "atelier:block/cotton/cotton_stage3"
+    },
+    "age=6": {
+      "model": "atelier:block/cotton/cotton_stage3"
+    },
+    "age=7": {
+      "model": "atelier:block/cotton/cotton"
+    }
+  }
+}

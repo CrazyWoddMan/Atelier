@@ -1,0 +1,19 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "tag": "forge:leather",
+      "count": 5
+    },
+    {
+      "tag": "forge:glass_panes"
+    }
+  ],
+  "spool": {
+    "tag": "forge:string",
+    "count": 5
+  },
+  "result": {
+    "item": "atelier:halfmask"
+  }
+}

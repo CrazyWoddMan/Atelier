@@ -1,9 +1,7 @@
 package crazywoddman.atelier.api.templates;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -12,39 +10,31 @@ import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 
-import org.jetbrains.annotations.NotNull;
-
 import crazywoddman.atelier.Atelier;
+import crazywoddman.atelier.api.HumanoidModelHelper;
 import crazywoddman.atelier.api.interfaces.IDyable;
 import crazywoddman.atelier.api.interfaces.IWearable;
 
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public abstract class DyableArmor extends ArmorItem implements IWearable, IDyable {
     private final int defaultColor;
-    private final String textureLocation;
-    private final String overlayLocation;
+    private String textureLocation;
+    private String overlayLocation;
+    private HumanoidModel<LivingEntity> model;
+    private boolean init;
 
-    public DyableArmor(ArmorMaterial material, Type type, Properties properties, int defaultColor, String textureLocation) {
+    public DyableArmor(ArmorMaterial material, Type type, Properties properties, int defaultColor) {
         super(material, type, properties);
         this.defaultColor = defaultColor;
-        this.textureLocation = textureLocation;
-        this.overlayLocation = Atelier.MODID + ":textures/empty.png";
     }
 
-    public DyableArmor(ArmorMaterial material, Type type, Properties properties, int defaultColor, String textureLocation, String overlayLocation) {
-        super(material, type, properties);
-        this.defaultColor = defaultColor;
-        this.textureLocation = textureLocation;
-        this.overlayLocation = overlayLocation;
+    public DyableArmor(ArmorMaterial material, Type type, Properties properties, int defaultColor, ResourceLocation textureLocation) {
+        this(material, type, properties, defaultColor);
+        this.textureLocation = textureLocation.toString();
+        this.overlayLocation = IWearable.getOverlayTexture(textureLocation).map(ResourceLocation::toString).orElse(Atelier.MODID + ":textures/empty.png");
+        this.init = true;
     }
-
-    @Override
-    public abstract Supplier<LayerDefinition> createLayer();
-
-    @Override
-    public abstract ModelLayerLocation getLayerLocation();
 
     @Override
     public int getDefaultColor() {
@@ -53,6 +43,11 @@ public abstract class DyableArmor extends ArmorItem implements IWearable, IDyabl
 
     @Override
     public String getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
+        if (!init) {
+            ResourceLocation key = getTextureKey();
+            this.textureLocation = IWearable.getModelTexture(key).toString();
+            this.overlayLocation = IWearable.getOverlayTexture(key).map(ResourceLocation::toString).orElse(Atelier.MODID + ":textures/empty.png");
+        }
         return type == null ? textureLocation : overlayLocation;
     }
 
@@ -60,18 +55,15 @@ public abstract class DyableArmor extends ArmorItem implements IWearable, IDyabl
     public void initializeClient(Consumer<IClientItemExtensions> consumer) {
         consumer.accept(new IClientItemExtensions() {
             @Override
-            public @NotNull HumanoidModel<?> getHumanoidArmorModel(LivingEntity living, ItemStack stack, EquipmentSlot slot, HumanoidModel<?> original) {
-                HumanoidModel<?> armorModel = new HumanoidModel<>(
-                    Minecraft
-                    .getInstance()
-                    .getEntityModels()
-                    .bakeLayer(getLayerLocation())
-                );
-                armorModel.crouching = living.isShiftKeyDown();
-                armorModel.riding = original.riding;
-                armorModel.young = living.isBaby();
+            public HumanoidModel<?> getHumanoidArmorModel(LivingEntity living, ItemStack stack, EquipmentSlot slot, HumanoidModel<?> original) {
+                if (model == null)
+                    model = HumanoidModelHelper.bake(getModelKey());
 
-                return armorModel;
+                model.crouching = living.isShiftKeyDown();
+                model.riding = original.riding;
+                model.young = living.isBaby();
+
+                return model;
             }
         });
     }

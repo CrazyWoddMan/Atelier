@@ -2,7 +2,6 @@ plugins {
     id 'java-library'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
     id 'org.spongepowered.mixin' version '0.7.+'
-    id 'com.modrinth.minotaur' version '2.+'
 }
 
 version = mod_version
@@ -55,25 +54,10 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
     maven {
-        // temp
-        name 'Curse Maven'
-        url 'https://cursemaven.com'
-        content {
-            includeGroup 'curse.maven'
-        }
-    }
-    maven {
         name 'Cloth Config'
         url 'https://maven.shedaniel.me'
         content {
             includeGroup 'me.shedaniel.cloth'
-        }
-    }
-    maven {
-        name 'Curios API'
-        url 'https://maven.theillusivec4.top'
-        content {
-            includeGroup 'top.theillusivec4.curios'
         }
     }
     maven {
@@ -85,14 +69,10 @@ repositories {
         url 'https://maven.su5ed.dev/releases'
     }
     maven {
-        name 'Fabric API for Accessories'
-        url 'https://maven.fabricmc.net'
-    }
-    maven {
-        name 'Conditional Mixin'
-        url 'https://maven.fallenbreath.me/releases'
+        name 'JEI, Immersive Engineering'
+        url 'https://maven.blamejared.com'
         content {
-            includeGroup 'me.fallenbreath'
+            includeGroup 'mezz.jei'
         }
     }
     flatDir {
@@ -103,19 +83,18 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
-    
-    jarJar(group: 'me.fallenbreath', name: 'conditional-mixin-forge', version: '[0.6.4]')
-    implementation fg.deobf("me.fallenbreath:conditional-mixin-forge:0.6.4")
 
     api fg.deobf("me.shedaniel.cloth:cloth-config-forge:11.1.136")
     
     compileOnly fg.deobf("blank:Warium-${warium_version}:${warium_version}")
 
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
-    
-    compileOnly fg.deobf("blank:Warium-${warium_version}:${warium_version}")
 
-    // compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.14.1+${mc_version}:api")
+    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common:15.20.0.112")
+    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-lib:15.20.0.112")
+    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:15.20.0.112")
+
+    implementation fg.deobf("com.github.glitchfiend:TerraBlender-forge:${mc_version}-3.0.1.10")
 
     compileOnly fg.deobf("io.wispforest:accessories-neoforge:1.0.0-beta.47+${mc_version}")
     compileOnly fg.deobf("io.wispforest:accessories-common:1.0.0-beta.47+${mc_version}-mojmap")
@@ -133,30 +112,6 @@ mixin {
     debug.export = true
 }
 
-modrinth {
-    token = System.getenv('MODRINTH_TOKEN')
-    projectId = mod_id
-    versionName = "${mod_name} ${version}"
-    versionType = 'beta'
-    uploadFile = "$buildDir/libs/${mod_id}-${mod_version}-all.jar"
-    gameVersions = [mc_version]
-    // dependencies {
-    //     required.project 'warium'
-    //     optional.version 'create', "${mc_version}-${create_version}"
-    //     optional.project 'cloth-config'
-    //     optional.project 'jei'
-    //     optional.project 'curios'
-    //     optional.project 'valkyrien-warium'
-    //     optional.project 'ponder'
-    //     optional.project 'immersiveengineering'
-    //     optional.project 'coloredwater'
-    //     optional.project 'supplementaries'
-    //     optional.version "create-tfmg", "0.9.3-${mc_version}"
-    //     optional.version "createaddition", "${mc_version}-1.2.5"
-    //     optional.version "create-diesel-generators", "${mc_version}-1.2i"
-    // }
-}
-
 tasks.named('processResources', ProcessResources).configure {
     var replaceProperties = [
             mc_version: mc_version,
@@ -170,7 +125,6 @@ tasks.named('processResources', ProcessResources).configure {
             mod_authors: mod_authors,
             credits: credits,
             mod_description: mod_description,
-            tests_directory: tests_directory,
             warium_version: warium_version
     ]
     inputs.properties replaceProperties
@@ -179,8 +133,6 @@ tasks.named('processResources', ProcessResources).configure {
         expand replaceProperties + [project: project]
     }
 }
-
-jarJar.enable()
 
 tasks.named('jar', Jar).configure {
     dependsOn 'cleanLibs'
@@ -212,11 +164,11 @@ tasks.register('cleanLibs', Delete) {
 tasks.register('copyModJar', Copy) {
     dependsOn build
     from("$buildDir/libs/") {
-        include '*-all.jar'
+        include '*.jar'
     }
-    into tests_directory
+    into System.getenv('MC_TESTS_DIR')
     onlyIf {
-        file(tests_directory).exists()
+        file(System.getenv('MC_TESTS_DIR')).exists()
     }
 }
 

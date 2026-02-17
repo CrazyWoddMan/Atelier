@@ -1,0 +1,4 @@
+{
+  "entities": ["dummmmmmy:target_dummy"],
+  "slots": ["armor_plate", "patch", "pouch", "armband", "gas_filter", "face", "hat", "legs", "jacket", "shoes"]
+}

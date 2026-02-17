@@ -64,7 +64,6 @@ public class SewingTableBlockEntity extends BlockEntity {
         return spoolInventory;
     }
     
-    // Хелпер методы
     public ItemStack getSpoolStack() {
         return spoolInventory.getStackInSlot(0);
     }

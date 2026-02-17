@@ -5,19 +5,19 @@ import java.util.List;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 
 import crazywoddman.atelier.Atelier;
+import crazywoddman.atelier.compat.jei.AtelierJEI;
 import crazywoddman.atelier.recipes.SewingRecipe;
 import crazywoddman.atelier.recipes.SewingRecipe.CountableIngredient;
-import net.minecraft.client.Minecraft;
+import io.wispforest.accessories.api.slot.SlotReference;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -27,6 +27,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 
 public class SewingTableScreen extends AbstractContainerScreen<SewingTableMenu> {
@@ -34,7 +35,7 @@ public class SewingTableScreen extends AbstractContainerScreen<SewingTableMenu> 
         "minecraft",
         "textures/gui/container/crafting_table.png"
     );
-    private static final ResourceLocation SEWING_TABLE = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(
         Atelier.MODID,
         "textures/gui/sewing_table.png"
     );
@@ -51,6 +52,7 @@ public class SewingTableScreen extends AbstractContainerScreen<SewingTableMenu> 
     private static final int RECIPE_BUTTON_WIDTH = 16;
     private static final int RECIPE_BUTTON_HEIGHT = 18;
     private static final int VISIBLE_RECIPES = 12;
+    private final int offscreenRows = (this.menu.recipes.size() + RECIPES_PER_ROW - 1) / RECIPES_PER_ROW - 3;
     
     private float scrollOffs;
     private boolean scrolling;
@@ -59,7 +61,14 @@ public class SewingTableScreen extends AbstractContainerScreen<SewingTableMenu> 
 
     public SewingTableScreen(SewingTableMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
-        menu.registerUpdateListener(this::modificationSlotChanged);
+        menu.registerUpdateListener(() -> {
+            boolean hasItemInModification = this.menu.getSlot(SewingTableMenu.MODIFICATION_SLOT).hasItem();
+        
+            if (this.displayRecipes && hasItemInModification)
+                this.displayRecipes = false;
+            else if (!this.displayRecipes && !hasItemInModification)
+                this.displayRecipes = true;
+        });
         this.displayRecipes = true;
         this.imageHeight = 166;
         this.inventoryLabelY = -this.imageHeight;
@@ -67,39 +76,33 @@ public class SewingTableScreen extends AbstractContainerScreen<SewingTableMenu> 
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(graphics);
         super.render(graphics, mouseX, mouseY, partialTick);
-        this.renderTooltip(graphics, mouseX, mouseY);
+        renderTooltip(graphics, mouseX, mouseY);
     }
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        
-        int windowX = (this.width - this.imageWidth) / 2;
-        int windowY = (this.height - this.imageHeight) / 2;
+        renderBackground(graphics);
         
         // Background
-        graphics.blit(INVENTORY, windowX, windowY, 0, 0, this.imageWidth, this.imageHeight);
-        graphics.blit(SEWING_TABLE, windowX, windowY - 10, 0, 0, this.imageWidth, this.imageHeight);
-        
-        // Scroll bar
-        graphics.blit(SEWING_TABLE, 
-            this.leftPos + SCROLLBAR_X,
-            this.topPos + SCROLLBAR_Y + (int)(41.0F * this.scrollOffs),
-            this.isScrollBarActive() ? 176 : 188,
-            0,
-            12,
-            15
-        );
-        
-        int recipeListX = this.leftPos + RECIPE_LIST_X;
-        int recipeListY = this.topPos + RECIPE_LIST_Y;
-        int endIndex = this.startIndex + VISIBLE_RECIPES;
+        graphics.blit(INVENTORY, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        graphics.blit(BACKGROUND, this.leftPos, this.topPos - 10, 0, 0, this.imageWidth, 89);
         
         if (this.displayRecipes) {
-            // Recipes buttons
+            graphics.blit(BACKGROUND, this.leftPos + 83, this.topPos - 5, 0, 89, 81, 56);
+            // Scroll bar
+            graphics.blit(BACKGROUND, 
+                this.leftPos + SCROLLBAR_X,
+                this.topPos + SCROLLBAR_Y + (int)(41.0F * this.scrollOffs),
+                this.isScrollBarActive() ? 176 : 188,
+                0,
+                12,
+                15
+            );
+            // Recipe buttons
+            int recipeListX = this.leftPos + RECIPE_LIST_X;
+            int recipeListY = this.topPos + RECIPE_LIST_Y;
+            int endIndex = this.startIndex + VISIBLE_RECIPES;
             for (int recipeIndex = this.startIndex; recipeIndex < endIndex && recipeIndex < this.menu.recipes.size(); recipeIndex++) {
                 int slotIndex = recipeIndex - this.startIndex;
                 int slotX = recipeListX + (slotIndex % RECIPES_PER_ROW) * RECIPE_BUTTON_WIDTH;
@@ -109,26 +112,91 @@ public class SewingTableScreen extends AbstractContainerScreen<SewingTableMenu> 
                 
                 if (recipeIndex == this.menu.getRecipeIndex())
                     y += RECIPE_BUTTON_HEIGHT; // Chosen button
-                else if (
-                    mouseX >= slotX
-                    && mouseX < slotX + RECIPE_BUTTON_WIDTH
-                    && mouseY >= slotY
-                    && mouseY < slotY + RECIPE_BUTTON_HEIGHT
-                )
+                else if (isHovering(RECIPE_LIST_X + slotIndex % RECIPES_PER_ROW * RECIPE_BUTTON_WIDTH + 1, RECIPE_LIST_Y + slotIndex / RECIPES_PER_ROW * RECIPE_BUTTON_HEIGHT + 2, RECIPE_BUTTON_WIDTH - 2, RECIPE_BUTTON_HEIGHT - 2, mouseX, mouseY))
                     y += RECIPE_BUTTON_HEIGHT * 2; // Current button under the cursor
 
-                graphics.blit(SEWING_TABLE, slotX, slotY - 1, this.imageWidth, y, RECIPE_BUTTON_WIDTH, RECIPE_BUTTON_HEIGHT);
+                graphics.blit(BACKGROUND, slotX, slotY - 1, this.imageWidth, y, RECIPE_BUTTON_WIDTH, RECIPE_BUTTON_HEIGHT);
             }
-            // Recipes
+            // Other buttons
             for (int recipeIndex = this.startIndex; recipeIndex < endIndex && recipeIndex < this.menu.recipes.size(); recipeIndex++) {
                 int slotIndex = recipeIndex - this.startIndex;
                 graphics.renderItem(
-                    this.menu.recipes.get(recipeIndex).getResultItem(this.minecraft.level.registryAccess()), 
+                    this.menu.getRecipe(recipeIndex).getResultItem(this.minecraft.level.registryAccess()), 
                     recipeListX + (slotIndex % RECIPES_PER_ROW) * RECIPE_BUTTON_WIDTH,
                     recipeListY + (slotIndex / RECIPES_PER_ROW) * RECIPE_BUTTON_HEIGHT + 2
                 );
             }
+        } else {
+            RenderSystem.setShaderColor(0, 0, 0, 0.2f);
+
+            for (int i = 0; i < this.menu.modificationModules.size(); i++) {
+                if (this.menu.slots.get(SewingTableMenu.INGREDIENTS_START + i).hasItem())
+                    continue;
+
+                ResourceLocation path = SlotReference.of(this.minecraft.player, this.menu.modificationModules.get(i), 0).type().icon();
+                graphics.blit(
+                    ResourceLocation.fromNamespaceAndPath(path.getNamespace(), "textures/" + path.getPath() + ".png"),
+                    // BACKGROUND,
+                    this.leftPos + INGREDIENTS_START_X + i * 18, this.topPos + INGREDIENTS_Y,
+                    0, 0,
+                    16, 16,
+                    16, 16
+                );
+            }
+            
+            RenderSystem.setShaderColor(1, 1, 1, 1);
         }
+        
+        graphics.pose().pushPose();
+        graphics.pose().translate(this.leftPos, this.topPos, 0);
+        
+        int selectedIndex = this.menu.getRecipeIndex();
+        
+        if (selectedIndex != -1) {
+            SewingRecipe recipe = this.menu.getRecipe(selectedIndex);
+            
+            if (!recipe.spool.isEmpty()) {
+                Slot spoolSlot = this.menu.getSlot(SewingTableMenu.SPOOL_SLOT);
+                
+                if (!spoolSlot.hasItem()) {
+                    ItemStack[] spoolAcceptable = recipe.spool.getItems();
+                    ItemStack spoolStack = spoolAcceptable[cycleEverySecond(spoolAcceptable.length)].copy();
+                    renderGhostItem(graphics, spoolStack, spoolSlot.x, spoolSlot.y);
+
+
+                    if (spoolStack.getCount() > 1) {
+                        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.3F);
+                        graphics.renderItemDecorations(this.font, spoolStack, spoolSlot.x, spoolSlot.y);
+                        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                    }
+                }
+            }
+            
+            for (int i = 0; i < Math.min(recipe.ingredients.size(), 9); i++) {
+                Slot ingredientSlot = this.menu.getSlot(SewingTableMenu.INGREDIENTS_START + i);
+            
+                if (ingredientSlot.hasItem())
+                    continue;
+
+                CountableIngredient ingredient = recipe.ingredients.get(i);
+                ItemStack[] suitableItems = ingredient.getItems();
+                ItemStack displayIngredient = suitableItems[cycleEverySecond(suitableItems.length)].copy();
+                int count = ingredient.getCount();
+                displayIngredient.setCount(count);
+                int x = INGREDIENTS_START_X + i * 18;
+                int y = INGREDIENTS_Y;
+                renderGhostItem(graphics, displayIngredient, x, y);
+                
+                if (count < 2)
+                    continue;
+
+                RenderSystem.setShaderColor(1, 1, 1, 0.3F);
+                graphics.renderItemDecorations(this.font, displayIngredient, x, y);
+                RenderSystem.setShaderColor(1, 1, 1, 1);
+            }
+        }
+
+        graphics.pose().popPose();
     }
 
     private static int cycleEverySecond(int length) {
@@ -138,225 +206,125 @@ public class SewingTableScreen extends AbstractContainerScreen<SewingTableMenu> 
         return 0;
     }
 
-    @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        super.renderLabels(graphics, mouseX, mouseY);
-        int selectedIndex = this.menu.getRecipeIndex();
+    private static class GhostItem implements MultiBufferSource {
+        private final GuiGraphics graphics;
         
-        if (selectedIndex < 0)
-            return; 
-        
-        SewingRecipe recipe = this.menu.recipes.get(selectedIndex);
-        List<CountableIngredient> ingredients = recipe.getCountableIngredients();
-        CountableIngredient spool = recipe.getSpool();
-        
-        if (!spool.isEmpty()) {
-            Slot spoolSlot = this.menu.getSlot(SewingTableMenu.SPOOL_SLOT);
-            
-            if (!spoolSlot.hasItem()) {
-                ItemStack[] spoolAcceptable = spool.getItems();
-                ItemStack spoolStack = spoolAcceptable[cycleEverySecond(spoolAcceptable.length)].copy();
-                // boolean enoughSpool = this.menu.getAvailableCount(spool.asIngredient()) >= spool.getCount();
-                PoseStack poseStack = graphics.pose();
-                ItemRenderer itemRenderer = this.minecraft.getItemRenderer();
-                BakedModel model = itemRenderer.getModel(spoolStack, this.minecraft.level, this.minecraft.player, 0);
-                
-                poseStack.pushPose();
-                poseStack.translate(spoolSlot.x, spoolSlot.y, 100);
-                poseStack.translate(8, 8, 0);
-                poseStack.scale(16, -16, 16);
-
-                MultiBufferSource.BufferSource originalBufferSource = this.minecraft.renderBuffers().bufferSource();
-                MultiBufferSource wrappedBufferSource = new MultiBufferSource() {
-                    @Override
-                    public VertexConsumer getBuffer(RenderType type) {
-                        VertexConsumer original = originalBufferSource.getBuffer(type);
-                        
-                        return new VertexConsumer() {
-                            @Override
-                            public VertexConsumer vertex(double x, double y, double z) {
-                                return original.vertex(x, y, z);
-                            }
-                            
-                            @Override
-                            public VertexConsumer color(int red, int green, int blue, int alpha) {
-                                return original.color(
-                                    red,
-                                    green,
-                                    blue,
-                                    alpha
-                                );
-                            }
-                            
-                            @Override
-                            public VertexConsumer uv(float u, float v) {
-                                return original.uv(u, v);
-                            }
-                            
-                            @Override
-                            public VertexConsumer overlayCoords(int u, int v) {
-                                return original.overlayCoords(u, v);
-                            }
-                            
-                            @Override
-                            public VertexConsumer uv2(int u, int v) {
-                                return original.uv2(u, v);
-                            }
-                            
-                            @Override
-                            public VertexConsumer normal(float x, float y, float z) {
-                                return original.normal(x, y, z);
-                            }
-                            
-                            @Override
-                            public void endVertex() {
-                                original.endVertex();
-                            }
-                            
-                            @Override
-                            public void defaultColor(int red, int green, int blue, int alpha) {
-                                original.defaultColor(red, green, blue, alpha);
-                            }
-                            
-                            @Override
-                            public void unsetDefaultColor() {
-                                original.unsetDefaultColor();
-                            }
-                        };
-                    }
-                };
-                
-                itemRenderer.render(
-                    spoolStack,
-                    ItemDisplayContext.GUI,
-                    false,
-                    poseStack,
-                    wrappedBufferSource,
-                    15728880,
-                    OverlayTexture.NO_OVERLAY,
-                    model
-                );
-                
-                originalBufferSource.endBatch();
-                poseStack.popPose();
-
-
-                if (spoolStack.getCount() > 1) {
-                    RenderSystem.enableBlend();
-                    RenderSystem.defaultBlendFunc();
-                    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.5F);
-                    graphics.renderItemDecorations(this.font, spoolStack, spoolSlot.x, spoolSlot.y);
-                    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                    RenderSystem.disableBlend();
-                }
-            }
+        private GhostItem(GuiGraphics graphics) {
+            this.graphics = graphics;
         }
-        
-        for (int i = 0; i < Math.min(ingredients.size(), 9); i++) {
-            CountableIngredient ingredient = ingredients.get(i);
-            ItemStack[] suitableItems = ingredient.getItems();
-            ItemStack displayIngredient = suitableItems[cycleEverySecond(suitableItems.length)].copy();
-            int count = ingredient.getCount();
-            displayIngredient.setCount(count);
+
+        @Override
+        public VertexConsumer getBuffer(RenderType type) {
+            VertexConsumer original = graphics.bufferSource().getBuffer(type);
             
-            int x = INGREDIENTS_START_X + i * 18;
-            int y = INGREDIENTS_Y;
-            
-            boolean hasEnough = this.menu.getAvailableCount(ingredient.asIngredient()) >= count;
-
-            graphics.renderItem(displayIngredient, x, y);
-            
-            if (count < 2)
-                continue;
-
-            if (!hasEnough) {
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.5F);
-            }
-
-            graphics.renderItemDecorations(this.font, displayIngredient, x, y);
-
-            if (!hasEnough) {
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            }
+            return new VertexConsumer() {
+                @Override
+                public VertexConsumer vertex(double x, double y, double z) {
+                    return original.vertex(x, y, z);
+                }
+                
+                @Override
+                public VertexConsumer color(int red, int green, int blue, int alpha) {
+                    return original.color(red, green, blue, alpha / 2);
+                }
+                
+                @Override
+                public VertexConsumer uv(float u, float v) {
+                    return original.uv(u, v);
+                }
+                
+                @Override
+                public VertexConsumer overlayCoords(int u, int v) {
+                    return original.overlayCoords(u, v);
+                }
+                
+                @Override
+                public VertexConsumer uv2(int u, int v) {
+                    return original.uv2(u, v);
+                }
+                
+                @Override
+                public VertexConsumer normal(float x, float y, float z) {
+                    return original.normal(x, y, z);
+                }
+                
+                @Override
+                public void endVertex() {
+                    original.endVertex();
+                }
+                
+                @Override
+                public void defaultColor(int red, int green, int blue, int alpha) {
+                    original.defaultColor(red, green, blue, alpha / 2);
+                }
+                
+                @Override
+                public void unsetDefaultColor() {
+                    original.unsetDefaultColor();
+                }
+            };
         }
     }
+
+    private void renderGhostItem(GuiGraphics graphics, ItemStack item, int x, int y) {
+        PoseStack pose = graphics.pose();
+        pose.pushPose();
+        pose.translate(x + 8, y + 8, 16);
+        pose.scale(16, 16, 1);
+        pose.mulPose(Axis.XP.rotationDegrees(180));
+
+        ItemRenderer render = this.minecraft.getItemRenderer();
+        render.render(
+            new ItemStack(Items.STICK), // workaround for BlockItem transparent render
+            ItemDisplayContext.GUI,
+            false,
+            graphics.pose(),
+            new GhostItem(graphics),
+            15728880,
+            OverlayTexture.NO_OVERLAY,
+            render.getModel(item, this.minecraft.level, this.minecraft.player, 0)
+        );
+        graphics.flush();
+        pose.popPose();
+    }
+
+    private void renderTooltip(Ingredient ingredient, GuiGraphics graphics, int x, int y) {
+        ItemStack[] stacks = ingredient.getItems();
+        ItemStack display = stacks[cycleEverySecond(stacks.length)];
+
+        if (!Atelier.jei || !AtelierJEI.renderJeiTooltip(display, stacks, graphics, x, y))
+            graphics.renderTooltip(this.font, display, x, y);
+	}
 
     @Override
     protected void renderTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
         super.renderTooltip(graphics, mouseX, mouseY);
-        int index = this.menu.getRecipeIndex();
-
-        if (index == -1)
-            return;
-
-        SewingRecipe recipe = this.menu.recipes.get(index);
         
         if (!this.displayRecipes)
             return;
 
-        if (!recipe.getSpool().isEmpty()) {
-            int spoolX = this.leftPos + SewingTableMenu.SPOOL_SLOT_X;
-            int spoolY = this.topPos + SewingTableMenu.SPOOL_SLOT_Y;
+        int index = this.menu.getRecipeIndex();
 
-            if (
-                !this.menu.slots.get(SewingTableMenu.SPOOL_SLOT).hasItem()
-                && mouseX >= spoolX
-                && mouseX < spoolX + 18
-                && mouseY >= spoolY
-                && mouseY < spoolY + 18
-            ) {
-                ItemStack[] spool = recipe.getSpool().getItems();
-                graphics.renderTooltip(
-                    this.font,
-                    spool[cycleEverySecond(spool.length)],
-                    mouseX,
-                    mouseY
-                );
-            }
-        }
+        if (index != -1) {
+            SewingRecipe recipe = this.menu.getRecipe(index);
 
-        List<Ingredient> ingredients = recipe.getIngredients();
+            if (!recipe.spool.isEmpty() && !this.menu.slots.get(SewingTableMenu.SPOOL_SLOT).hasItem() && isHovering(SewingTableMenu.SPOOL_SLOT_X, SewingTableMenu.SPOOL_SLOT_Y, 16, 16, mouseX, mouseY))
+                renderTooltip(recipe.spool.asIngredient(), graphics, mouseX, mouseY);
 
-        for (int ingredientIndex = 0; ingredientIndex < ingredients.size(); ingredientIndex++) {
-            Ingredient ingredient = ingredients.get(ingredientIndex);
+            List<Ingredient> ingredients = recipe.getIngredients();
 
-            int ingredientX = this.leftPos + INGREDIENTS_START_X + ingredientIndex * 18;
-            int ingredientY = this.topPos + INGREDIENTS_Y;
-
-            if (
-                mouseX >= ingredientX
-                && mouseX < ingredientX + 18
-                && mouseY >= ingredientY
-                && mouseY < ingredientY + 18
-            ) {
-
-                ItemStack[] stacks = ingredient.getItems();
-                
-                graphics.renderTooltip(
-                    this.font,
-                    stacks[(cycleEverySecond(stacks.length))],
-                    mouseX,
-                    mouseY
-                );
-            }
+            for (int i = 0; i < ingredients.size(); i++)
+                if (!this.menu.slots.get(SewingTableMenu.INGREDIENTS_START + i).hasItem() && isHovering(INGREDIENTS_START_X + i * 18, INGREDIENTS_Y, 16, 16, mouseX, mouseY))
+                    renderTooltip(ingredients.get(i), graphics, mouseX, mouseY);
         }
 
         for (int recipeIndex = this.startIndex; recipeIndex < this.startIndex + VISIBLE_RECIPES && recipeIndex < this.menu.recipes.size(); recipeIndex++) {
             int slotIndex = recipeIndex - this.startIndex;
-            int recipeX = this.leftPos + RECIPE_LIST_X + (slotIndex % RECIPES_PER_ROW) * RECIPE_BUTTON_WIDTH;
-            int recipeY = this.topPos + RECIPE_LIST_Y + slotIndex / RECIPES_PER_ROW * RECIPE_BUTTON_HEIGHT + 2;
-
-            if (
-                mouseX >= recipeX
-                && mouseX < recipeX + RECIPE_BUTTON_WIDTH
-                && mouseY >= recipeY
-                && mouseY < recipeY + RECIPE_BUTTON_HEIGHT
-            )
+            
+            if (isHovering(RECIPE_LIST_X + slotIndex % RECIPES_PER_ROW * RECIPE_BUTTON_WIDTH + 1, RECIPE_LIST_Y + slotIndex / RECIPES_PER_ROW * RECIPE_BUTTON_HEIGHT + 2, RECIPE_BUTTON_WIDTH - 2, RECIPE_BUTTON_HEIGHT - 2, mouseX, mouseY))
                 graphics.renderTooltip(
                     this.font,
-                    this.menu.recipes.get(recipeIndex).getResultItem(this.minecraft.level.registryAccess()),
+                    this.menu.getRecipe(recipeIndex).getResultItem(this.minecraft.level.registryAccess()),
                     mouseX,
                     mouseY
                 );
@@ -368,42 +336,18 @@ public class SewingTableScreen extends AbstractContainerScreen<SewingTableMenu> 
         this.scrolling = false;
         
         if (this.displayRecipes) {
-            int recipeListX = this.leftPos + RECIPE_LIST_X;
-            int recipeListY = this.topPos + RECIPE_LIST_Y;
-            int endIndex = this.startIndex + VISIBLE_RECIPES;
-
-            for (int recipeIndex = this.startIndex; recipeIndex < endIndex; recipeIndex++) {
+            for (int recipeIndex = this.startIndex; recipeIndex < this.startIndex + VISIBLE_RECIPES; recipeIndex++) {
                 int slotIndex = recipeIndex - this.startIndex;
-                double deltaX = mouseX - (recipeListX + (slotIndex % RECIPES_PER_ROW) * RECIPE_BUTTON_WIDTH);
-                double deltaY = mouseY - (recipeListY + (slotIndex / RECIPES_PER_ROW) * RECIPE_BUTTON_HEIGHT);
                 
-                if (
-                    deltaX >= 0.0
-                    && deltaY >= 0.0
-                    && deltaX < RECIPE_BUTTON_WIDTH
-                    && deltaY < RECIPE_BUTTON_HEIGHT
-                ) {
-                    Minecraft
-                    .getInstance()
-                    .getSoundManager()
-                    .play(
-                        SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F)
-                    );
+                if (isHovering(RECIPE_LIST_X + slotIndex % RECIPES_PER_ROW * RECIPE_BUTTON_WIDTH + 1, RECIPE_LIST_Y + slotIndex / RECIPES_PER_ROW * RECIPE_BUTTON_HEIGHT + 2, RECIPE_BUTTON_WIDTH - 2, RECIPE_BUTTON_HEIGHT - 2, mouseX, mouseY)) {
+                    this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1));
                     this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, recipeIndex);
 
                     return true;
                 }
             }
-
-            int scrollbarClickX = this.leftPos + SCROLLBAR_X;
-            int scrollbarClickY = this.topPos + SCROLLBAR_Y;
             
-            if (
-                mouseX >= scrollbarClickX
-                && mouseX < scrollbarClickX + SCROLLBAR_CLICK_WIDTH
-                && mouseY >= scrollbarClickY
-                && mouseY < scrollbarClickY + SCROLLBAR_CLICK_HEIGHT
-            )
+            if (isHovering(SCROLLBAR_X, SCROLLBAR_Y, SCROLLBAR_CLICK_WIDTH, SCROLLBAR_CLICK_HEIGHT, mouseX, mouseY))
                 this.scrolling = true;
         }
 
@@ -411,7 +355,7 @@ public class SewingTableScreen extends AbstractContainerScreen<SewingTableMenu> 
     }
 
     private void updateStartIndex() {
-        this.startIndex = (int)((this.scrollOffs * this.getOffscreenRows()) + 0.5D) * RECIPES_PER_ROW;
+        this.startIndex = (int)((this.scrollOffs * this.offscreenRows) + 0.5) * RECIPES_PER_ROW;
     }
 
     @Override
@@ -433,9 +377,7 @@ public class SewingTableScreen extends AbstractContainerScreen<SewingTableMenu> 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollDelta) {
         if (this.isScrollBarActive()) {
-            int offscreenRows = this.getOffscreenRows();
-            
-            this.scrollOffs = Mth.clamp(this.scrollOffs - (float)(scrollDelta / offscreenRows), 0.0F, 1.0F);
+            this.scrollOffs = Mth.clamp(this.scrollOffs - (float)(scrollDelta / this.offscreenRows), 0, 1);
             updateStartIndex();
         }
 
@@ -444,19 +386,5 @@ public class SewingTableScreen extends AbstractContainerScreen<SewingTableMenu> 
 
     private boolean isScrollBarActive() {
         return this.displayRecipes && this.menu.recipes.size() > VISIBLE_RECIPES;
-    }
-
-    private int getOffscreenRows() {
-        return (this.menu.recipes.size() + RECIPES_PER_ROW - 1) / RECIPES_PER_ROW - 3;
-    }
-
-    // Recipes box switcher
-    private void modificationSlotChanged() {
-        boolean hasItemInModification = this.menu.getSlot(SewingTableMenu.MODIFICATION_SLOT).hasItem();
-        
-        if (this.displayRecipes && hasItemInModification)
-            this.displayRecipes = false;
-        else if (!this.displayRecipes && !hasItemInModification)
-            this.displayRecipes = true;
     }
 }

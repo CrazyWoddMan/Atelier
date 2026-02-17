@@ -1,0 +1,10 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [],
+  "spool": {
+    "item": "atelier:cotton_spool"
+  },
+  "result": {
+    "item": "atelier:fabric"
+  }
+}

@@ -1,8 +1,46 @@
 {
-  "type": "minecraft:stonecutting",
-  "count": 1,
-  "ingredient": {
-    "item": "minecraft:netherite_ingot"
-  },
-  "result": "atelier:netherite_plate"
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:tag_empty",
+          "tag": "forge:plates/netherite"
+        },
+        {
+          "type": "forge:mod_loaded",
+          "modid": "create"
+        }
+      ],
+      "recipe": {
+        "type": "create:pressing",
+        "ingredients": [
+          {
+            "item": "minecraft:netherite_ingot"
+          }
+        ],
+        "results": [
+          {
+            "item": "atelier:netherite_plate"
+          }
+        ]
+      }
+    },
+    {
+      "conditions": [
+        {
+          "type": "forge:tag_empty",
+          "tag": "forge:plates/netherite"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:stonecutting",
+        "count": 1,
+        "ingredient": {
+          "item": "minecraft:netherite_ingot"
+        },
+        "result": "atelier:netherite_plate"
+      }
+    }
+  ]
 }

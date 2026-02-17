@@ -2,31 +2,63 @@ package crazywoddman.atelier.api.interfaces;
 
 import java.util.function.Supplier;
 
-import crazywoddman.atelier.accessories.SimpleWearableRenderer;
-import io.wispforest.accessories.api.client.AccessoryRenderer;
-import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
-public interface IWearableAccessory extends IWearable {
-    /**
-     * @return AccessoryRenderer for the item's model. Implementation of {@link #getTextureLocation()} and {@link #getOverlayLocation()} doesn't matter if this method is overridden
-     */
+import crazywoddman.atelier.api.SimpleWearableRenderer;
+import io.wispforest.accessories.api.Accessory;
+import io.wispforest.accessories.api.SoundEventData;
+import io.wispforest.accessories.api.client.AccessoryRenderer;
+import io.wispforest.accessories.api.slot.SlotReference;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+
+public interface IWearableAccessory extends IWearable, Accessory {
+    
     default Supplier<AccessoryRenderer> getRenderer() {
-        return () -> new SimpleWearableRenderer(
-            getLayerLocation(), 
-            getTextureLocation(),
-            getOverlayLocation()
-        );
+        return () -> new SimpleWearableRenderer(getTextureKey(), getModelKey(), ref -> true);
     }
 
-    /**
-     * @return {@link ResourceLocation} of the main texture of the model (the one that should be able to change color if {@link IDyable} is implemented)
-     */
-    ResourceLocation getTextureLocation();
+    @Override
+    default int maxStackSize(ItemStack stack) {
+        return 1;
+    }
+
+    @Override
+    default void onEquip(ItemStack stack, SlotReference reference) {
+        playSound(reference, getEquipSound());
+    }
+
+    @Override
+    default void onUnequip(ItemStack stack, SlotReference reference) {
+        playSound(reference, getUnequipSound());
+    }
+
+    public static void playSound(SlotReference reference, SoundEventData sound) {
+        if (sound != null) {
+            LivingEntity entity = reference.entity();
+            entity.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), sound.event(), entity.getSoundSource(), sound.volume(), sound.pitch());
+        }
+    }
+
+    @Nullable
+    default SoundEventData getEquipSound() {
+        return new SoundEventData(SoundEvents.ARMOR_EQUIP_LEATHER, 1, 1);
+    }
+
+    @Nullable
+    default SoundEventData getUnequipSound() {
+        SoundEventData sound = getEquipSound();
+        return sound == null ? null : new SoundEventData(sound.event(), sound.volume(), sound.pitch() * 0.8f);
+    }
+
+    @Override
+    default void onEquipFromUse(ItemStack stack, SlotReference reference) {}
 
     /**
-     * @return ResourceLocation of the overlay texture that doesn't affected by dye. Should be null if {@link IDyable} isn't implemented
-     */
-    default ResourceLocation getOverlayLocation() {
-        return null;
-    };
+    * For hats only!
+    **/
+    default boolean hideUnderHelmet() {
+        return true;
+    }
 }

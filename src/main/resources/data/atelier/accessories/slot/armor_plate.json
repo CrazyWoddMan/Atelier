@@ -1,6 +1,7 @@
 {
   "amount": 0,
   "operation": "set",
+  "order": 900,
   "icon": "atelier:gui/slot/armor_plate",
   "drop_rule": "KEEP",
   "validators": ["atelier:armor_plate"]

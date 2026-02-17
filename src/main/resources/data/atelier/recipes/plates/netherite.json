@@ -1,8 +1,36 @@
 {
-  "type": "atelier:armor_plate",
-  "plate": {
-    "tag": "forge:plates/netherite"
-  },
-  "protection": 0.9,
-  "durability": 800
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:tag_empty",
+          "tag": "forge:plates/netherite"
+        }
+      ],
+      "recipe": {
+        "type": "atelier:armor_plate",
+        "plate": {
+          "item": "atelier:netherite_plate"
+        },
+        "protection": 5,
+        "durability": 350
+      }
+    },
+    {
+      "conditions": [
+        {
+          "type": "forge:true"
+        }
+      ],
+      "recipe": {
+        "type": "atelier:armor_plate",
+        "plate": {
+          "tag": "forge:plates/netherite"
+        },
+        "protection": 5,
+        "durability": 350
+      }
+    }
+  ]
 }

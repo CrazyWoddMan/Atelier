@@ -19,15 +19,15 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 
 public class PlateRecipe implements Recipe<Container> {
     private final ResourceLocation id;
-    private final Ingredient plate;
-    private final float protection;
-    private final int durability;
+    public final Ingredient plate;
+    public final byte protection;
+    public final Optional<Integer> durability;
 
-    public PlateRecipe(ResourceLocation id, Ingredient plate, float protection, int durability) {
+    public PlateRecipe(ResourceLocation id, Ingredient plate, byte protection, int durability) {
         this.id = id;
         this.plate = plate;
         this.protection = protection;
-        this.durability = durability;
+        this.durability = durability == 0 ? Optional.empty() : Optional.of(durability);
     }
 
     @Override
@@ -58,60 +58,44 @@ public class PlateRecipe implements Recipe<Container> {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return PlatesSerializer.INSTANCE;
+        return AtelierRecipes.PLATES_SERIALIZER.get();
     }
 
     @Override
     public RecipeType<?> getType() {
-        return PlateRecipeType.INSTANCE;
-    }
-
-    public Ingredient getPlate() {
-        return this.plate;
-    }
-
-    public float getProtection() {
-        return this.protection;
-    }
-
-    public Optional<Integer> getDurability() {
-        return this.durability == -1 ? Optional.empty() : Optional.of(this.durability);
+        return AtelierRecipes.PLATE_RECIPE_TYPE.get();
     }
 
     public boolean matches(ItemStack stack) {
         return this.plate.test(stack);
     }
 
-    public static class PlateRecipeType implements RecipeType<PlateRecipe> {
-        public static final PlateRecipeType INSTANCE = new PlateRecipeType();
-    }
-
-    public static class PlatesSerializer implements RecipeSerializer<PlateRecipe> {
-        public static final PlatesSerializer INSTANCE = new PlatesSerializer();
+    public static class Type implements RecipeType<PlateRecipe> {}
+    public static class Serializer implements RecipeSerializer<PlateRecipe> {
 
         @Override
-        public PlateRecipe fromJson(ResourceLocation recipeId, JsonObject recipeJson) {
+        public PlateRecipe fromJson(ResourceLocation id, JsonObject recipeJson) {
             Ingredient plate = CraftingHelper.getIngredient(recipeJson.get("plate"), false);
-            float protection = GsonHelper.getAsFloat(recipeJson, "protection");
-            int durability = GsonHelper.getAsInt(recipeJson, "durability", -1);
+            byte protection = GsonHelper.getAsByte(recipeJson, "protection");
+            int durability = GsonHelper.getAsInt(recipeJson, "durability", 0);
 
-            return new PlateRecipe(recipeId, plate, protection, durability);
+            return new PlateRecipe(id, plate, protection, durability);
         }
 
         @Override
-        public PlateRecipe fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
+        public PlateRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buffer) {
             Ingredient plate = Ingredient.fromNetwork(buffer);
-            float protection = buffer.readFloat();
-            int durability = buffer.readInt();
+            byte protection = buffer.readByte();
+            int durability = buffer.readVarInt();
 
-            return new PlateRecipe(recipeId, plate, protection, durability);
+            return new PlateRecipe(id, plate, protection, durability);
         }
 
         @Override
         public void toNetwork(FriendlyByteBuf buffer, PlateRecipe recipe) {
             recipe.plate.toNetwork(buffer);
-            buffer.writeFloat(recipe.protection);
-            buffer.writeInt(recipe.durability);
+            buffer.writeByte(recipe.protection);
+            buffer.writeVarInt(recipe.durability.orElse(0));
         }
     }
 }

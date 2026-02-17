@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "aba",
+	  "aca",
+    "aca"
+  ],
+  "key": {
+    "a": {
+      "tag": "forge:plates/iron"
+    },
+    "b": {
+      "item": "minecraft:paper"
+    },
+    "c": {
+      "item": "minecraft:soul_sand"
+    }
+  },
+  "result": {
+    "item": "atelier:advanced_filter"
+  }
+}
