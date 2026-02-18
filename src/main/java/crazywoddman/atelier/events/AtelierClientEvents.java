@@ -60,7 +60,7 @@ public class AtelierClientEvents {
                 }
             }
             
-            if (Atelier.cloth_config)
+            if (Atelier.CLOTH_CONFIG_LOADED)
                 ClothConfig.registerConfigScreen();
         });
     }

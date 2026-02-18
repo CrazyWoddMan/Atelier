@@ -80,10 +80,10 @@ public class Atelier {
     public static final String MODID = "atelier";
 
     private static final ModList modlist = ModList.get();
-    public static final boolean cloth_config = modlist.isLoaded("cloth_config");
-    public static final boolean warium = modlist.isLoaded("crusty_chunks");
-    public static final boolean jei = modlist.isLoaded("jei");
-    public static final boolean terrablender = modlist.isLoaded("terrablender");
+    public static final boolean CLOTH_CONFIG_LOADED = modlist.isLoaded("cloth_config");
+    public static final boolean WARIUM_LOADED = modlist.isLoaded("crusty_chunks");
+    public static final boolean JEI_LOADED = modlist.isLoaded("jei");
+    public static final boolean TERRABLENDER_LOADED = modlist.isLoaded("terrablender");
 
     public Atelier(FMLJavaModLoadingContext context) {
         IEventBus bus = context.getModEventBus();
@@ -105,7 +105,7 @@ public class Atelier {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-            if (terrablender)
+            if (TERRABLENDER_LOADED)
                 CottonField.register();
 
             BrewingRecipeRegistry.addRecipe(new FilterBrewing(

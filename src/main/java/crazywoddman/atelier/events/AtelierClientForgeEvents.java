@@ -44,8 +44,8 @@ public class AtelierClientForgeEvents {
         if (AtelierRecipes.isPlate(item)) {
             List<Component> tooltip = event.getToolTip();
             tooltip.add(1, Component.empty());
-            tooltip.add(2, Component.translatable("atelier.tooltip.equipped").withStyle(ChatFormatting.GRAY));
-            tooltip.add(3, Component.translatable("atelier.tooltip.plate.protection", AtelierRecipes.getPlateRecipe(item).get().protection).withStyle(ChatFormatting.BLUE));
+            tooltip.add(2, Component.translatable(Atelier.MODID + ".tooltip.equipped").withStyle(ChatFormatting.GRAY));
+            tooltip.add(3, Component.literal("+" + AtelierRecipes.getPlateRecipe(item).get().protection + " ").append(Component.translatable(Atelier.WARIUM_LOADED ? Atelier.MODID + ".tooltip.plate.protection" : "enchantment.minecraft.projectile_protection")).withStyle(ChatFormatting.BLUE));
         }
     }
 

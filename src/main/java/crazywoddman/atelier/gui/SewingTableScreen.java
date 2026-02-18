@@ -292,7 +292,7 @@ public class SewingTableScreen extends AbstractContainerScreen<SewingTableMenu> 
         ItemStack[] stacks = ingredient.getItems();
         ItemStack display = stacks[cycleEverySecond(stacks.length)];
 
-        if (!Atelier.jei || !AtelierJEI.renderJeiTooltip(display, stacks, graphics, x, y))
+        if (!Atelier.JEI_LOADED || !AtelierJEI.renderJeiTooltip(display, stacks, graphics, x, y))
             graphics.renderTooltip(this.font, display, x, y);
 	}
 

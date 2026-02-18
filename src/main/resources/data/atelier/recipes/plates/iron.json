@@ -1,36 +1,8 @@
 {
-  "type": "forge:conditional",
-  "recipes": [
-    {
-      "conditions": [
-        {
-          "type": "forge:tag_empty",
-          "tag": "forge:plates/iron"
-        }
-      ],
-      "recipe": {
-        "type": "atelier:armor_plate",
-        "plate": {
-          "item": "atelier:iron_plate"
-        },
-        "protection": 2,
-        "durability": 50
-      }
-    },
-    {
-      "conditions": [
-        {
-          "type": "forge:true"
-        }
-      ],
-      "recipe": {
-        "type": "atelier:armor_plate",
-        "plate": {
-          "tag": "forge:plates/iron"
-        },
-        "protection": 2,
-        "durability": 50
-      }
-    }
-  ]
+  "type": "atelier:armor_plate",
+  "plate": {
+    "tag": "forge:plates/iron"
+  },
+  "protection": 2,
+  "durability": 50
 }

@@ -53,7 +53,7 @@
     "atelier.tooltip.filter.prepared": "Підготовлено",
     "atelier.tooltip.filter.creative": "будь-якого шкідливого ефекту",
     "atelier.tooltip.equipped": "Коли екіперовано:",
-    "atelier.tooltip.plate.protection": "+%d Захист від куль",
+    "atelier.tooltip.plate.protection": "Захист від куль",
     "atelier.config.kneePadsProtection.desc0": "1 = 100%",
     "atelier.config.bombVest": "Тип вибуху підсумків",
     "atelier.config.bombVest.desc0": "DISABLE: Підсумки не можуть вибухнути",

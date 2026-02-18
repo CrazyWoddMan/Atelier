@@ -24,6 +24,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -123,13 +124,14 @@ public class AtelierForgeEvents {
 
     @SubscribeEvent
     public static void onLivingHurt(LivingHurtEvent event) {
-        if (event.getSource().is(DamageTypes.FALL)) {
+        DamageSource source = event.getSource();
+        
+        if (source.is(DamageTypes.FALL)) {
             AccessoriesCapability.getOptionally(event.getEntity()).ifPresent(inventory -> {
                 if (inventory.isEquipped(AtelierItems.KNEEPADS.get()))
                     event.setAmount(event.getAmount() * (1 - Config.SERVER.kneePadsProtection.get().floatValue()));
             });
-        }
-        if (Atelier.warium && event.getSource().getMsgId().equals("armor_bypass_damage")) {
+        } else if (Atelier.WARIUM_LOADED ? source.getMsgId().equals("armor_bypass_damage") : source.is(DamageTypes.ARROW)) {
             LivingEntity entity = event.getEntity();
             ItemStack vest = event.getEntity().getItemBySlot(EquipmentSlot.CHEST);
                 

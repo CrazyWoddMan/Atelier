@@ -57,7 +57,7 @@
 	"atelier.tooltip.filter.prepared": "Prepared",
 	"atelier.tooltip.filter.creative": "any harmful effect",
 	"atelier.tooltip.equipped": "When Equipped:",
-	"atelier.tooltip.plate.protection": "+%d Bullet Protection",
+	"atelier.tooltip.plate.protection": "Bullet Protection",
 	"itemGroup.atelier": "Atelier",
 	"atelier.config.kneePadsProtection.desc0": "1 = 100%",
 	"atelier.config.bombVest": "Pouches explosion type",

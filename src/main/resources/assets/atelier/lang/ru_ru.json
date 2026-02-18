@@ -53,7 +53,7 @@
     "atelier.tooltip.filter.prepared": "Подготовлен",
     "atelier.tooltip.filter.creative": "любого вредного эффекта",
     "atelier.tooltip.equipped": "Когда экипировано:",
-    "atelier.tooltip.plate.protection": "+%d Защита от пуль",
+    "atelier.tooltip.plate.protection": "Защита от пуль",
     "atelier.config.kneePadsProtection.desc0": "1 = 100%",
     "atelier.config.bombVest": "Тип взрыва подсумков",
     "atelier.config.bombVest.desc0": "DISABLE: Подсумки не могут сдетонировать",
