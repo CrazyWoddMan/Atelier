@@ -59,6 +59,15 @@ public class ModulesDataProvider implements ICapabilityProvider {
     public static class ModulesData implements INBTSerializable<CompoundTag> {
         private final LivingEntity entity;
         private boolean dirty;
+        private int tickStamp = -10;
+
+        public boolean checkStamp() {
+            return Math.abs(this.tickStamp - this.entity.tickCount) > 2;
+        }
+
+        public void putStamp() {
+            this.tickStamp = this.entity.tickCount;
+        }
         
         public record ParentReference(SlotReference accessoriesSlot, EquipmentSlot equipmentSlot) {
             public ParentReference(SlotReference accessoriesSlot) {

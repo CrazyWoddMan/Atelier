@@ -1,6 +1,6 @@
 modLoader="javafml"
 loaderVersion="${loader_version_range}"
-# issueTrackerURL = "https://github.com/CrazyWoddMan/${project.name}/issues/"
+issueTrackerURL = "https://github.com/CrazyWoddMan/${project.name}/issues/"
 license="MIT"
 
 [[mods]]

@@ -13,8 +13,8 @@
         "plate": {
           "item": "atelier:netherite_plate"
         },
-        "protection": 5,
-        "durability": 350
+        "protection": 4,
+        "durability": 1200
       }
     },
     {
@@ -28,8 +28,8 @@
         "plate": {
           "tag": "forge:plates/netherite"
         },
-        "protection": 5,
-        "durability": 350
+        "protection": 4,
+        "durability": 1200
       }
     }
   ]

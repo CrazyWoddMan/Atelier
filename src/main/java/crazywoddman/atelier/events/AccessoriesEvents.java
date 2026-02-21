@@ -15,9 +15,12 @@ import io.wispforest.accessories.api.AccessoriesCapability;
 import io.wispforest.accessories.api.AccessoriesContainer;
 import io.wispforest.accessories.api.events.AccessoryChangeCallback;
 import io.wispforest.accessories.api.events.SlotStateChange;
+import io.wispforest.accessories.api.events.CanEquipCallback;
+import io.wispforest.accessories.api.events.CanUnequipCallback;
 import io.wispforest.accessories.api.slot.SlotReference;
 import io.wispforest.accessories.api.slot.SlotTypeReference;
 import io.wispforest.accessories.impl.ExpandedSimpleContainer;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -33,6 +36,17 @@ public class AccessoriesEvents {
 
     public static void register() {
         AccessoryChangeCallback.EVENT.register(AccessoriesEvents::onAccessoryChange);
+        CanEquipCallback.EVENT.register(AccessoriesEvents::canEquip);
+        CanUnequipCallback.EVENT.register(AccessoriesEvents::canEquip);
+    }
+
+    // TODO: find better quick-move-stack dupe solution
+    private static TriState canEquip(ItemStack stack, SlotReference reference) {
+        return reference
+            .entity()
+            .getCapability(ModulesDataProvider.MODULES_DATA)
+            .map(cap -> cap.checkStamp() ? TriState.DEFAULT : TriState.FALSE)
+            .orElse(TriState.DEFAULT);
     }
 
     private static void doModulesStuff(
@@ -150,6 +164,8 @@ public class AccessoriesEvents {
         LivingEntity entity = reference.entity();
         Item newItem = newStack.getItem();
         Item prevItem = prevStack.getItem();
+        System.out.println(stateChange.name() + ": from " + prevItem.getDescription().getString() + (prevStack.getTag() == null ? "" : (" " + prevStack.getTag())));
+        System.out.println(stateChange.name() + ": to " + newItem.getDescription().getString() + (newStack.getTag() == null ? "" : (" " + newStack.getTag())));
         String eventSlot = reference.slotName();
         byte index = (byte)reference.slot();
         Map<String, Integer> newModules = IModular.getModules(newItem, reference.slotName(), index);
@@ -170,7 +186,7 @@ public class AccessoriesEvents {
         List<ParentReference> hierarchy = modulesData.get(eventSlot);
 
         if (hierarchy.size() <= index)
-                return;
+            return;
             
         ParentReference parent = hierarchy.get(index);
         int localIndex = index - hierarchy.indexOf(parent);
@@ -185,6 +201,7 @@ public class AccessoriesEvents {
         );
 
         writeToCompound(parentItem, newStack, eventSlot, localIndex);
+        modulesData.putStamp();
     }
 
     @SubscribeEvent
@@ -246,6 +263,8 @@ public class AccessoriesEvents {
                         parent.setTag(null);
                 }  
             }
+
+            System.out.println("removed " + module + "[" + index + "]" + (parentTag == null ? "" : (": " + parentTag)));
         } else {
             CompoundTag parentModules = getOrCreateTag(parent.getOrCreateTag(), "modules");
             ListTag items = parentModules.getList(module, ListTag.TAG_COMPOUND);
@@ -257,6 +276,8 @@ public class AccessoriesEvents {
 
             if (!parentModules.contains(module))
                 parentModules.put(module, items);
+
+            System.out.println("added " + stack.getDisplayName().getString() + " in " + module + "[" + index + "]" + parent.getTag());
         }
     }
 

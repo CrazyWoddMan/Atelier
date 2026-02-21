@@ -75,6 +75,12 @@ repositories {
             includeGroup 'mezz.jei'
         }
     }
+    maven {
+        url 'https://cursemaven.com'
+        content {
+            includeGroup 'curse.maven'
+        }
+    }
     flatDir {
         name 'Warium, Valkyrien Warium'
         dir 'libs'
@@ -102,6 +108,8 @@ dependencies {
     compileOnly fg.deobf("dev.su5ed.sinytra.fabric-api:fabric-api-base:0.4.31+ef105b4977"){
         exclude group: "dev.su5ed.sinytra.fabric-api"
     }
+
+    implementation fg.deobf("curse.maven:fast-nbt-1417466:7463766")
 }
 
 mixin {

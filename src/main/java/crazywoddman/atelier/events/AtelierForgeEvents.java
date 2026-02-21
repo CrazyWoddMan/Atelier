@@ -33,6 +33,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -53,6 +54,12 @@ public class AtelierForgeEvents {
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
         AtelierRecipes.reload(event.getServer().getRecipeManager());
+    }
+
+    @SubscribeEvent
+    public static void onDatapackSync(OnDatapackSyncEvent event) {
+        if (event.getPlayer() == null)
+            AtelierRecipes.reload(event.getPlayerList().getServer().getRecipeManager());
     }
 
     @SubscribeEvent

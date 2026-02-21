@@ -41,12 +41,13 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class SewingTableMenu extends AbstractContainerMenu {
     public static final int SPOOL_SLOT = 0;
-    public static final int MODIFICATION_SLOT = SPOOL_SLOT + 1;
-    public static final int INGREDIENTS_START = MODIFICATION_SLOT + 1;
-    public static final int RESULT_SLOT = INGREDIENTS_START + 1;
+    public static final int INGREDIENTS_START = SPOOL_SLOT + 1;
+    public static final int INGREDIENTS_END = INGREDIENTS_START + 8;
+    public static final int MODIFICATION_SLOT = INGREDIENTS_END + 1;
+    public static final int RESULT_SLOT = MODIFICATION_SLOT + 1;
     public static final int INVENTORY_START = RESULT_SLOT + 1;
     public static final int HOTBAR_START = INVENTORY_START + 27;
-    public static final int INVENTORY_END = INVENTORY_START + 35;
+    public static final int INVENTORY_END = HOTBAR_START + 8;
     public static final int SPOOL_SLOT_X = 7;
     public static final int SPOOL_SLOT_Y = 26;
 
@@ -63,6 +64,7 @@ public class SewingTableMenu extends AbstractContainerMenu {
 
     private final DataSlot selectedRecipeIndex = DataSlot.standalone();
     private Runnable slotUpdateListener = () -> {};
+    private int tickStamp;
 
     public SewingTableMenu(int id, Inventory playerInventory, BlockPos pos) {
         super(AtelierMenuTypes.SEWING_TABLE.get(), id);
@@ -104,6 +106,53 @@ public class SewingTableMenu extends AbstractContainerMenu {
                 return super.mayPlace(stack) && ((getRecipeIndex() == -1 || getRecipe().spool.isEmpty()) ? AtelierRecipes.SPOOL_ITEMS.contains(stack.getItem()) : getRecipe().spool.test(stack));
             };
         });
+
+        // Ingredients
+        this.ingredientSlots = new SimpleContainer(9);
+        for (int i = 0; i < 9; i++) {
+            int ind = i;
+            addSlot(new Slot(ingredientSlots, i, 8 + i * 18, 57) {
+                private final int localIndex = ind;
+
+                @Override
+                public void setChanged() {
+                    super.setChanged();
+
+                    if (modificationModules != null) {
+                        String slot = modificationModules.get(this.localIndex);
+                        AccessoriesEvents.writeToCompound(modificationSlot.getItem(), getItem(), slot, this.localIndex - modificationModules.indexOf(slot));
+                    } else
+                        updateResult();
+                };
+
+                public int getMaxStackSize() {
+                    return modificationSlot.hasItem() ? 1 : super.getMaxStackSize();
+                };
+
+                @Override
+                public boolean mayPlace(ItemStack stack) {
+                    if (!super.mayPlace(stack))
+                        return false;
+
+                    if (modificationModules != null) {
+                        if (this.localIndex >= modificationModules.size())
+                            return false;
+
+                        String slot = modificationModules.get(this.localIndex);
+                        return AccessoriesAPI.canInsertIntoSlot(stack, SlotReference.of(inventory.player, slot, this.localIndex - modificationModules.indexOf(slot)));
+                    }
+
+                    int selectedIndex = getRecipeIndex();
+                    
+                    if (selectedIndex == -1)
+                        return false;
+
+                    List<CountableIngredient> ingredients = getRecipe(selectedIndex).ingredients;
+                    
+                    return ingredients.size() > this.localIndex && ingredients.get(this.localIndex).test(stack);
+                }
+            });
+        }
 
         // Modification
         this.modification = new SimpleContainer(1);
@@ -150,54 +199,14 @@ public class SewingTableMenu extends AbstractContainerMenu {
                 return !resultSlot.isActive() && super.isActive();
             }
 
-            public void onTake(Player player, ItemStack stack) {
-                modificationModules = null;
+            @Override
+            public void onTake(Player player, ItemStack item) {
                 ingredientSlots.clearContent();
+                modificationModules = null;
+                super.onTake(player, item);
             };
         });
-
-        // Ingredients
-        this.ingredientSlots = new SimpleContainer(9);
-        for (int i = 0; i < 9; i++) {
-            int ind = i;
-            addSlot(new Slot(ingredientSlots, i, 8 + i * 18, 57) {
-                private final int localIndex = ind;
-
-                public void setChanged() {
-                    super.setChanged();
-
-                    if (modificationModules != null) {
-                        String slot = modificationModules.get(this.localIndex);
-                        AccessoriesEvents.writeToCompound(modificationSlot.getItem(), getItem(), slot, this.localIndex - modificationModules.indexOf(slot));
-                    } else
-                        updateResult();
-                };
-
-                @Override
-                public boolean mayPlace(ItemStack stack) {
-                    if (!super.mayPlace(stack))
-                        return false;
-
-                    if (modificationModules != null) {
-                        if (this.localIndex >= modificationModules.size())
-                            return false;
-
-                        String slot = modificationModules.get(this.localIndex);
-                        return AccessoriesAPI.canInsertIntoSlot(stack, SlotReference.of(inventory.player, slot, this.localIndex - modificationModules.indexOf(slot)));
-                    }
-
-                    int selectedIndex = getRecipeIndex();
-                    
-                    if (selectedIndex == -1)
-                        return false;
-
-                    List<CountableIngredient> ingredients = getRecipe(selectedIndex).ingredients;
-                    
-                    return ingredients.size() > this.localIndex && ingredients.get(this.localIndex).test(stack);
-                }
-            });
-        }
-
+        
         // Result
         this.resultSlot = addSlot(new Slot(new SimpleContainer(1), 0, 59, 26) {
             @Override
@@ -240,7 +249,10 @@ public class SewingTableMenu extends AbstractContainerMenu {
                 }
 
                 updateResult();
-                player.level().playSound(player, sewingTable.getBlockPos(), AtelierSounds.SEWING_MACHINE.get(), SoundSource.BLOCKS, 1, 0.9f + player.getRandom().nextFloat() * 0.1f);
+                if (Math.abs(tickStamp - player.tickCount) > 1) {
+                    tickStamp = player.tickCount;
+                    player.level().playSound(player, sewingTable.getBlockPos(), AtelierSounds.SEWING_MACHINE.get(), SoundSource.BLOCKS, 1, 0.9f + player.getRandom().nextFloat() * 0.1f);
+                }
                 super.onTake(player, item);
             }
         });
@@ -318,7 +330,7 @@ public class SewingTableMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index) {        
+    public ItemStack quickMoveStack(Player player, int index) {
         Slot slot = this.slots.get(index);
         
         if (!slot.hasItem())
@@ -327,28 +339,11 @@ public class SewingTableMenu extends AbstractContainerMenu {
         ItemStack stack = slot.getItem();
         ItemStack original = stack.copy();
         
-        if (index == RESULT_SLOT || index == MODIFICATION_SLOT) {
-            if (!this.moveItemStackTo(stack, INVENTORY_START, INVENTORY_END + 1, true))
+        if (index == RESULT_SLOT) {
+            if (!slot.mayPickup(player) || !this.moveItemStackTo(stack, INVENTORY_START, INVENTORY_END + 1, true))
                 return ItemStack.EMPTY;
-            
-            if (index == RESULT_SLOT) {
-                slot.onQuickCraft(stack, original);
-                
-                if (stack.isEmpty())
-                    slot.setByPlayer(ItemStack.EMPTY);
-                else
-                    slot.setChanged();
-                    
-                if (stack.getCount() == original.getCount())
-                    return ItemStack.EMPTY;
-                    
-                slot.onTake(player, stack);
-            }
-        } else if (index >= INGREDIENTS_START && index < INVENTORY_START) {
-            if (!this.moveItemStackTo(stack, INVENTORY_START, INVENTORY_END + 1, false))
-                return ItemStack.EMPTY;
-        } else if (index == SPOOL_SLOT) {
-            if (!this.moveItemStackTo(stack, INVENTORY_START, INVENTORY_END + 1, false))
+        } else if (index < RESULT_SLOT) {
+            if (!this.moveItemStackTo(stack, INVENTORY_START, INVENTORY_END + 1, index == MODIFICATION_SLOT))
                 return ItemStack.EMPTY;
         } else if (!this.moveItemStackTo(stack, SPOOL_SLOT, RESULT_SLOT, false)) {
             if (index < HOTBAR_START) {
@@ -357,7 +352,8 @@ public class SewingTableMenu extends AbstractContainerMenu {
             } else if (!this.moveItemStackTo(stack, INVENTORY_START, HOTBAR_START, false))
                 return ItemStack.EMPTY;
         }
-        
+
+        slot.onTake(player, stack);
         return original;
     }
 

@@ -13,7 +13,7 @@ public enum AtelierArmorMaterials implements ArmorMaterial {
     PHANTOM_SILK(
         AtelierItems.PHANTOM_SILK.getId().getPath(),
         6,
-        new int[]{1, 3, 4, 1}, // Protection: boots, leggings, chestplate, helmmet
+        new int[]{1, 4, 2, 1}, // Protection: helmet, chestplate,, leggings, boots
         15,
         SoundEvents.ARMOR_EQUIP_LEATHER,
         0.0F,

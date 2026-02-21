@@ -126,7 +126,7 @@ public class SewingTableScreen extends AbstractContainerScreen<SewingTableMenu> 
                     recipeListY + (slotIndex / RECIPES_PER_ROW) * RECIPE_BUTTON_HEIGHT + 2
                 );
             }
-        } else {
+        } else if (this.menu.modificationModules != null) {
             RenderSystem.setShaderColor(0, 0, 0, 0.2f);
 
             for (int i = 0; i < this.menu.modificationModules.size(); i++) {

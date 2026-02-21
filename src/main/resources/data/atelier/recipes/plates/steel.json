@@ -1,17 +1,8 @@
 {
-  "conditions": [
-    {
-      "type": "forge:not",
-      "value": {
-        "type": "forge:tag_empty",
-        "tag": "forge:plates/steel"
-      }
-    }
-  ],
   "type": "atelier:armor_plate",
   "plate": {
     "tag": "forge:plates/steel"
   },
-  "protection": 4,
-  "durability": 150
+  "protection": 3,
+  "durability": 400
 }

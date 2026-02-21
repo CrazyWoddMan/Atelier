@@ -24,9 +24,9 @@ public class ArmorVestB extends DyableArmor {
 
     @Override
     public Supplier<LayerDefinition> createLayer() {
-        return HumanoidModelHelper.createLayer(64, 64, partdefinition -> {
-            partdefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 48).addBox(-4.0F, -0.25F, -2.5F, 8.0F, 10.0F, 5.0F, new CubeDeformation(0.5F, 0.5F, 0.0F))
-		    .texOffs(0, 39).addBox(-4.5F, 6.25F, -2.2F, 9.0F, 3.0F, 5.0F, new CubeDeformation(0.5F, 0.5F, 0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
-        });
+        return HumanoidModelHelper.createLayer(64, 64, partdefinition ->
+            partdefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 49).addBox(-4.0F, -0.25F, -2.5F, 8.0F, 10.0F, 5.0F, new CubeDeformation(0.5F, 0.5F, 0))
+		    .texOffs(0, 41).addBox(-4.5F, 6.25F, -2.5F, 9.0F, 3.0F, 5.0F, new CubeDeformation(0.5F)), PartPose.ZERO)
+        );
     };
 }

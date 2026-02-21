@@ -10,6 +10,8 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 
 import crazywoddman.atelier.Atelier;
 import crazywoddman.atelier.AtelierTags;
+import crazywoddman.atelier.items.AtelierItems;
+import crazywoddman.atelier.items.accessories.KneePads;
 import crazywoddman.atelier.recipes.AtelierRecipes;
 import io.wispforest.accessories.api.AccessoriesCapability;
 import io.wispforest.accessories.api.AccessoriesContainer;
@@ -22,6 +24,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RecipesUpdatedEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -37,12 +40,19 @@ public class AtelierClientForgeEvents {
         "textures/gui/gasmask_overlay.png"
     );
 
+    @SubscribeEvent
+    public static void onRecipesUpdated(RecipesUpdatedEvent event) {
+         AtelierRecipes.reload(event.getRecipeManager());
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onItemTooltip(ItemTooltipEvent event) {
         Item item = event.getItemStack().getItem();
-
-        if (AtelierRecipes.isPlate(item)) {
-            List<Component> tooltip = event.getToolTip();
+        List<Component> tooltip = event.getToolTip();
+        
+        if (item == AtelierItems.KNEEPADS.get())
+            tooltip.add(tooltip.size() - 2, Component.translatable("item.atelier.kneepads.protection", KneePads.protection).withStyle(ChatFormatting.BLUE));
+        else if (AtelierRecipes.isPlate(item)) {
             tooltip.add(1, Component.empty());
             tooltip.add(2, Component.translatable(Atelier.MODID + ".tooltip.equipped").withStyle(ChatFormatting.GRAY));
             tooltip.add(3, Component.literal("+" + AtelierRecipes.getPlateRecipe(item).get().protection + " ").append(Component.translatable(Atelier.WARIUM_LOADED ? Atelier.MODID + ".tooltip.plate.protection" : "enchantment.minecraft.projectile_protection")).withStyle(ChatFormatting.BLUE));
