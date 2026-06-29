@@ -2,15 +2,16 @@
   "type": "atelier:sewing_table",
   "ingredients": [
     {
-      "tag": "minecraft:wool",
-      "count": 3
+      "tag": "atelier:fabric",
+      "count": 5
+    },
+    {
+      "tag": "minecraft:wool"
     }
   ],
   "spool": {
     "tag": "forge:string",
-    "count": 3
+    "count": 6
   },
-  "result": {
-    "item": "atelier:ushanka"
-  }
+  "result": "atelier:ushanka"
 }

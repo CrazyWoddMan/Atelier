@@ -5,7 +5,5 @@
       "tag": "forge:leather"
     }
   ],
-  "result": {
-    "item": "atelier:leather_glove"
-  }
+  "result": "atelier:leather_glove"
 }

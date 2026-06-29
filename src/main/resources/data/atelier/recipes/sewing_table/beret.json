@@ -1,0 +1,17 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "item": "atelier:fabric",
+      "count": 3
+    },
+    {
+      "item": "atelier:fabric"
+    }
+  ],
+  "spool": {
+    "tag": "forge:string",
+    "count": 4
+  },
+  "result": "atelier:beret"
+}

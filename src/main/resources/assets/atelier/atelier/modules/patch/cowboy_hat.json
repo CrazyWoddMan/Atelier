@@ -1,0 +1,14 @@
+{
+  "module": "patch",
+  "wearable": {
+    "item": "atelier:cowboy_hat"
+  },
+  "variants": [
+    {
+      "bodypart": "HEAD",
+      "scale": [0.25, 0.25, 0.25],
+      "rotation": [-2.5, 0, 90],
+      "translate": [0.0625, -0.55, -0.28]
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "entities": ["dummmmmmy:target_dummy"],
+  "slots": ["face", "head", "hands", "body", "back", "suit", "belt", "arm", "legs"]
+}

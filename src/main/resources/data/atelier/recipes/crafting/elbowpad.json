@@ -1,0 +1,13 @@
+{
+  "type": "atelier:dyeable_transform",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "atelier:kneepads"
+    }
+  ],
+  "result": {
+    "item": "atelier:elbowpad",
+    "count": 2
+  }
+}

@@ -1,13 +1,4 @@
 {
-  "conditions": [
-    {
-      "type": "forge:not",
-      "value": {
-        "type": "forge:tag_empty",
-        "tag": "atelier:predicate"
-      }
-    }
-  ],
   "type": "minecraft:stonecutting",
   "count": 1,
   "ingredient": {

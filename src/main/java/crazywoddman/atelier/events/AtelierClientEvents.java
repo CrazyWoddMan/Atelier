@@ -1,33 +1,39 @@
 package crazywoddman.atelier.events;
 
-import crazywoddman.atelier.renderers.ConfigurableModuleRenderer;
-
 import java.util.function.Supplier;
 
 import crazywoddman.atelier.Atelier;
-import crazywoddman.atelier.api.WearablesRegister;
-import crazywoddman.atelier.api.interfaces.IDyable;
+import crazywoddman.atelier.api.CompatHelper;
+import crazywoddman.atelier.api.interfaces.IDyeable;
 import crazywoddman.atelier.api.interfaces.IWearable;
 import crazywoddman.atelier.api.interfaces.IWearableAccessory;
-import crazywoddman.atelier.config.ClothConfig;
+import crazywoddman.atelier.client.ModulesRenderData;
+import crazywoddman.atelier.client.renderers.AtelierRenderLayer;
+import crazywoddman.atelier.compat.clothconfig.AtelierClothConfig;
 import crazywoddman.atelier.gui.AtelierMenuTypes;
+import crazywoddman.atelier.gui.ContainerItemTooltip;
+import crazywoddman.atelier.gui.ClientContainerItemTooltip;
+import crazywoddman.atelier.gui.ClientModuleTooltip;
+import crazywoddman.atelier.gui.ModuleTooltip;
 import crazywoddman.atelier.gui.SewingTableScreen;
-import io.wispforest.accessories.api.client.AccessoriesRendererRegistry;
-import io.wispforest.accessories.api.client.AccessoryRenderer;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent.RegisterLayerDefinitions;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 
 @EventBusSubscriber(modid = Atelier.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class AtelierClientEvents {
@@ -37,54 +43,70 @@ public class AtelierClientEvents {
         event.enqueueWork(() -> {
             MenuScreens.register(AtelierMenuTypes.SEWING_TABLE.get(), SewingTableScreen::new);
 
-            for (DyeColor color : DyeColor.values())
-                AccessoriesRendererRegistry.registerRenderer(
-                    ForgeRegistries.ITEMS.getValue(
-                        ResourceLocation.fromNamespaceAndPath("minecraft", color.getName() + "_banner")
-                    ),
-                    ConfigurableModuleRenderer::new
-                );
-            for (RegistryObject<Item> object : WearablesRegister.ALL) {
-                Item item = object.get();
-                
-                if (item instanceof IWearableAccessory wearable) {
-                    Supplier<AccessoryRenderer> renderer = wearable.getRenderer();
-
-                    if (renderer != null)
-                        AccessoriesRendererRegistry.registerRenderer(
-                            item,
-                            renderer
-                        );
-                    else
-                        AccessoriesRendererRegistry.registerNoRenderer(item);
-                }
-            }
+            ForgeRegistries.ITEMS.forEach(item -> {
+                if (item instanceof IWearableAccessory wearable)
+                    CompatHelper.registerRenderer(item, wearable.getRenderer());
+            });
             
             if (Atelier.CLOTH_CONFIG_LOADED)
-                ClothConfig.registerConfigScreen();
+                AtelierClothConfig.registerConfigScreen();
         });
     }
 
     @SubscribeEvent
+    public static void onRegisterReloadListeners(RegisterClientReloadListenersEvent event) {
+        ModulesRenderData.register(event);
+    }
+
+    @SubscribeEvent
+    public static void registerTooltipComponent(RegisterClientTooltipComponentFactoriesEvent event) {
+        event.register(ModuleTooltip.class, ClientModuleTooltip::new);
+        event.register(ContainerItemTooltip.class, ClientContainerItemTooltip::new);
+    }
+
+    @SubscribeEvent
     public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
-        for (RegistryObject<Item> item : WearablesRegister.DYABLE)
-            event.register(
-                (stack, layer) ->
-                    layer == 0
-                    ? ((IDyable)stack.getItem()).getColor(stack)
-                    : 16777215,
-                item.get()
-            );
+        event.register(
+            (stack, layer) -> {
+                return layer < IDyeable.getDefaultColors(stack).length
+                ? IDyeable.getColor(stack, layer)
+                : 0xFFFFFF;
+            },
+            ForgeRegistries.ITEMS.getValues().stream().filter(item -> item instanceof IDyeable).toArray(Item[]::new)
+        );
     }
 
     @SubscribeEvent
     public static void registerLayerDefinitions(RegisterLayerDefinitions event) {
-        for (RegistryObject<Item> object : WearablesRegister.ALL)
-            if (object.get() instanceof IWearable wearable) {
+        ForgeRegistries.ITEMS.forEach(item -> {
+            if (item instanceof IWearable wearable) {
                 Supplier<LayerDefinition> layer = wearable.createLayer();
+                ResourceLocation key = wearable.getLayerKey();
 
-                if (layer != null)
-                    event.registerLayerDefinition(new ModelLayerLocation(wearable.getModelKey(), "main"), layer);
+                if (layer != null && key != null)
+                    event.registerLayerDefinition(new ModelLayerLocation(key, "main"), layer);
             }
+        });
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SubscribeEvent
+    public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
+        for (EntityType<?> entityType : ForgeRegistries.ENTITY_TYPES) {
+            try {
+                var livingEntityRenderer = event.getRenderer((EntityType<LivingEntity>) entityType);
+
+                if (livingEntityRenderer != null && livingEntityRenderer.getModel() instanceof HumanoidModel)
+                    livingEntityRenderer.addLayer(new AtelierRenderLayer(livingEntityRenderer));
+
+            } catch (ClassCastException ignore) {}
+        }
+
+        event.getSkins().forEach(model -> {
+            var livingEntityRenderer = event.getSkin(model);
+
+            if (livingEntityRenderer != null && livingEntityRenderer.getModel() instanceof HumanoidModel)
+                livingEntityRenderer.addLayer(new AtelierRenderLayer(livingEntityRenderer));
+        });
     }
 }

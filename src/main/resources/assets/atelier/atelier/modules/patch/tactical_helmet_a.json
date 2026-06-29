@@ -1,0 +1,20 @@
+{
+  "module": "patch",
+  "wearable": {
+    "item": "atelier:tactical_helmet_a"
+  },
+  "variants": [
+    {
+      "bodypart": "HEAD",
+      "scale": [0.25, 0.25, 0.25],
+      "rotation": [-5, -90, 90],
+      "translate": [0.305, -0.38, 0]
+    },
+    {
+      "bodypart": "HEAD",
+      "scale": [0.25, 0.25, 0.25],
+      "rotation": [-5, 90, 90],
+      "translate": [-0.305, -0.39, -0.125]
+    }
+  ]
+}

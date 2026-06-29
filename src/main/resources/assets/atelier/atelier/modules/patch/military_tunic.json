@@ -1,0 +1,20 @@
+{
+  "module": "patch",
+  "wearable": {
+    "item": "atelier:military_tunic"
+  },
+  "variants": [
+    {
+      "bodypart": "LEFT_ARM",
+      "scale": [0.3, 0.3, 0.3],
+      "rotation": [-90, 0, 90],
+      "translate": [0.13, -0.135, 0]
+    },
+    {
+      "bodypart": "RIGHT_ARM",
+      "scale": [0.3, 0.3, 0.3],
+      "rotation": [-90, 0, 90],
+      "translate": [0.02, -0.135, 0]
+    }
+  ]
+}

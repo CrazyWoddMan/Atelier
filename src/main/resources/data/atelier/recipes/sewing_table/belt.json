@@ -12,7 +12,5 @@
   "spool": {
     "tag": "forge:string"
   },
-  "result": {
-    "item": "atelier:belt"
-  }
+  "result": "atelier:belt"
 }

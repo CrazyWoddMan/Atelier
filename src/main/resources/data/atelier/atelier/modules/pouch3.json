@@ -1,0 +1,7 @@
+{
+  "wearable": {
+    "tag": "atelier:modules/pouch3"
+  },
+  "module": "pouch",
+  "amount": 3
+}

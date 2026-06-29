@@ -1,0 +1,12 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "tag": "forge:leather"
+    }
+  ],
+  "spool": {
+    "tag": "forge:string"
+  },
+  "result": "atelier:pouch"
+}

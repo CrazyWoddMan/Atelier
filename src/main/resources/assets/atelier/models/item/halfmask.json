@@ -1,7 +1,0 @@
-{
-	"parent": "item/generated",
-	"textures": {
-		"layer0" : "atelier:item/halfmask",
-		"layer1" : "atelier:item/halfmask_overlay"
-	}
-}

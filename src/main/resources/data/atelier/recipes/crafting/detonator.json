@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "a",
+	  "b"
+  ],
+  "key": {
+    "a": {
+      "item": "minecraft:redstone_torch"
+    },
+    "b": {
+      "item": "atelier:bioplastic"
+    }
+  },
+  "result": {
+    "item": "atelier:detonator"
+  }
+}

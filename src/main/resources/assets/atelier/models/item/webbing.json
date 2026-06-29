@@ -1,0 +1,8 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0" : "atelier:item/webbing/0",
+		"layer1" : "atelier:item/webbing/1",
+		"layer2" : "atelier:item/webbing/2"
+	}
+}

@@ -1,0 +1,7 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0" : "atelier:item/tank_top/0",
+        "layer1" : "atelier:item/tank_top/1"
+	}
+}

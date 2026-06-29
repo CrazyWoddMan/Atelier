@@ -2,7 +2,7 @@
   "type": "atelier:sewing_table",
   "ingredients": [
     {
-      "item": "atelier:phantom_silk",
+      "item": "atelier:phantom_cloth",
       "count": 8
     }
   ],
@@ -10,7 +10,5 @@
     "tag": "forge:string",
     "count": 8
   },
-  "result": {
-    "item": "atelier:armor_vest_c"
-  }
+  "result": "atelier:armor_vest_c"
 }

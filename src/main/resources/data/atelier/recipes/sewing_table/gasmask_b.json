@@ -1,0 +1,18 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "item": "atelier:biopolyster",
+      "count": 5
+    },
+    {
+      "tag": "forge:glass_panes",
+      "count": 2
+    }
+  ],
+  "spool": {
+    "tag": "forge:string",
+    "count": 2
+  },
+  "result": "atelier:gasmask_b"
+}

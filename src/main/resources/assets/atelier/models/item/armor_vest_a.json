@@ -1,6 +1,7 @@
 {
 	"parent": "item/generated",
 	"textures": {
-		"layer0" : "atelier:item/armor_vest_a"
+		"layer0" : "atelier:item/armor_vest_a/0",
+		"layer1" : "atelier:item/armor_vest_a/1"
 	}
 }

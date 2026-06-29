@@ -1,0 +1,37 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "tag": "atelier:starch_containing"
+    },
+    {
+      "tag": "atelier:starch_containing"
+    },
+    {
+      "tag": "atelier:starch_containing"
+    },
+    {
+      "tag": "atelier:starch_containing"
+    },
+    {
+      "tag": "forge:slimeballs"
+    },
+    {
+      "tag": "forge:slimeballs"
+    },
+    {
+      "item": "minecraft:sugar"
+    },
+    {
+      "item": "minecraft:sugar"
+    },
+    {
+      "item": "minecraft:water_bucket"
+    }
+  ],
+  "result": {
+    "item": "atelier:biopolymer",
+    "count": 4
+  }
+}

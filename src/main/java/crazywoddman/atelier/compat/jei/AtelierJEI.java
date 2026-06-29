@@ -7,9 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import crazywoddman.atelier.Atelier;
-import crazywoddman.atelier.AtelierTags;
+import crazywoddman.atelier.data.AtelierTags;
+import crazywoddman.atelier.data.AtelierData;
 import crazywoddman.atelier.items.AtelierItems;
-import crazywoddman.atelier.recipes.AtelierRecipes;
+import crazywoddman.atelier.items.templates.FilterItem;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
@@ -77,7 +78,7 @@ public class AtelierJEI implements IModPlugin {
         RecipeManager manager = Minecraft.getInstance().level.getRecipeManager();
         registration.addRecipes(
             SewingTableCategory.TYPE,
-            manager.getAllRecipesFor(AtelierRecipes.SEWING_RECIPE_TYPE.get())
+            manager.getAllRecipesFor(AtelierData.SEWING_RECIPE_TYPE.get())
         );
         IVanillaRecipeFactory vanillaRecipeFactory = registration.getVanillaRecipeFactory();
         List<IJeiBrewingRecipe> recipes = new ArrayList<>();
@@ -85,7 +86,7 @@ public class AtelierJEI implements IModPlugin {
         for (Item item : AtelierTags.Items.get(AtelierTags.Items.GAS_FILTERS)) {
             ItemStack filter = new ItemStack(item);
             ItemStack prepared = filter.copy();
-            prepared.getOrCreateTag().putBoolean("isPrepared", true);
+            prepared.getOrCreateTag().putBoolean(FilterItem.PREPARED_TAG, true);
             recipes.add(vanillaRecipeFactory.createBrewingRecipe(
                 List.of(new ItemStack(Items.MILK_BUCKET)),
                 filter,
@@ -95,7 +96,7 @@ public class AtelierJEI implements IModPlugin {
             ItemStack wither = filter.copy();
             ListTag tag = new ListTag();
             tag.add(StringTag.valueOf("minecraft:wither"));
-            wither.getOrCreateTag().put("effects", tag);
+            wither.getOrCreateTag().put(FilterItem.EFFECTS_TAG, tag);
             recipes.add(vanillaRecipeFactory.createBrewingRecipe(
                 List.of(new ItemStack(Items.WITHER_ROSE)),
                 prepared,
@@ -110,7 +111,7 @@ public class AtelierJEI implements IModPlugin {
                 for (MobEffectInstance effect : potion.getEffects())
                     effects.add(StringTag.valueOf(ForgeRegistries.MOB_EFFECTS.getKey(effect.getEffect()).toString()));
 
-                result.getOrCreateTag().put("effects", effects);
+                result.getOrCreateTag().put(FilterItem.EFFECTS_TAG, effects);
                 recipes.add(vanillaRecipeFactory.createBrewingRecipe(
                     List.of(PotionUtils.setPotion(new ItemStack(Items.POTION), potion)),
                     prepared,
@@ -133,10 +134,6 @@ public class AtelierJEI implements IModPlugin {
 
             if (jeiConfig.isTagContentTooltipEnabled()) {
                 if (items.length > 1) {
-                    if (display.getCount() > 1);
-                        for (ItemStack stack : items)
-                            stack.setCount(1);
-                        
                     JeiTooltip tooltip = new JeiTooltip();
                     IIngredientManager ingredientManager = jeiRuntime.getIngredientManager();
                     IIngredientType<ItemStack> type = ingredientManager.getIngredientTypeChecked(ItemStack.class).get();

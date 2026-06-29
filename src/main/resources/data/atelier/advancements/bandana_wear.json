@@ -1,0 +1,21 @@
+{
+  "criteria": {
+    "by_code": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "atelier:root",
+  "display": {
+    "description": {
+      "translate": "advancements.atelier.bandana_wear.description"
+    },
+    "frame": "task",
+    "icon": {
+      "item": "atelier:bandage",
+      "nbt": "{Colors:{0:4278654}}"
+    },
+    "title": {
+      "translate": "advancements.atelier.bandana_wear.title"
+    }
+  }
+}

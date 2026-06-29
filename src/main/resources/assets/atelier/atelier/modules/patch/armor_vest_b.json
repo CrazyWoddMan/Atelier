@@ -1,0 +1,14 @@
+{
+  "module": "patch",
+  "wearable": {
+    "item": "atelier:armor_vest_b"
+  },
+  "variants": [
+    {
+      "bodypart": "BODY",
+      "scale": [0.25, 0.25, 0.25],
+      "rotation": [0, 0, 90],
+      "translate": [0.06, 0.28, -0.15]
+    }
+  ]
+}

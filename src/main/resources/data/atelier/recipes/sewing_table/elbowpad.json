@@ -1,0 +1,15 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "item": "atelier:bioplastic"
+    },
+    {
+      "tag": "forge:leather"
+    }
+  ],
+  "spool": {
+    "tag": "forge:string"
+  },
+  "result": "atelier:elbowpad"
+}

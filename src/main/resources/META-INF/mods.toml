@@ -27,10 +27,3 @@ license="MIT"
     versionRange="[${mc_version}]"
     ordering="NONE"
     side="BOTH"
-	
-[[dependencies.${mod_id}]]
-    modId="accessories"
-    mandatory=true
-    versionRange="[0,)"
-    ordering="NONE"
-    side="BOTH"

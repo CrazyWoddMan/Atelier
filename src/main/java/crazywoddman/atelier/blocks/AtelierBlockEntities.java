@@ -1,7 +1,10 @@
 package crazywoddman.atelier.blocks;
 
+import java.util.Arrays;
+
 import crazywoddman.atelier.Atelier;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.BlockEntityType.BlockEntitySupplier;
 import net.minecraft.world.level.block.entity.BlockEntityType.Builder;
@@ -15,11 +18,23 @@ public class AtelierBlockEntities {
         REGISTRY.register(bus);
     }
 
-    public static final DeferredRegister<BlockEntityType<?>> REGISTRY = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Atelier.MODID);
-    
-    public static final RegistryObject<BlockEntityType<?>> SEWING_TABLE = register(AtelierBlocks.SEWING_TABLE.getId().getPath(), AtelierBlocks.SEWING_TABLE, SewingTableBlockEntity::new);
-
-    private static RegistryObject<BlockEntityType<?>> register(String registryname, RegistryObject<Block> block, BlockEntitySupplier<?> supplier) {
-        return REGISTRY.register(registryname, () -> Builder.of(supplier, new Block[]{block.get()}).build(null));
+    @SafeVarargs
+    private static <T extends BlockEntity> RegistryObject<BlockEntityType<T>> register(
+        String registryname,
+        BlockEntitySupplier<T> supplier,
+        RegistryObject<Block>... blocks
+    ) {
+        return REGISTRY.register(
+            registryname,
+            () -> Builder.of(supplier, Arrays.stream(blocks).map(RegistryObject::get).toArray(Block[]::new)).build(null)
+        );
     }
+
+    private static final DeferredRegister<BlockEntityType<?>> REGISTRY = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Atelier.MODID);
+    
+    public static final RegistryObject<BlockEntityType<SewingTableBlockEntity>> SEWING_TABLE = register(
+        AtelierBlocks.SEWING_TABLE.getId().getPath(),
+        SewingTableBlockEntity::new,
+        AtelierBlocks.SEWING_TABLE
+    );
 }

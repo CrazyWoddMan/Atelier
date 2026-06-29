@@ -1,0 +1,7 @@
+{
+  "wearable": {
+    "tag": "atelier:double_gasmasks"
+  },
+  "module": "gas_filter",
+  "amount": 2
+}

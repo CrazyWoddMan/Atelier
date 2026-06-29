@@ -1,6 +1,7 @@
 {
 	"parent": "item/generated",
 	"textures": {
-		"layer0" : "atelier:item/ushanka"
+		"layer0" : "atelier:item/ushanka/0",
+		"layer1" : "atelier:item/ushanka/1"
 	}
 }

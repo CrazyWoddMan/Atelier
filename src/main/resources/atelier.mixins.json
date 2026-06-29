@@ -8,7 +8,19 @@
     "PlateDamageMixin",
     "FakingGasMaskMixin",
     "GrassBlockMixin",
-    "TagLoaderMixin"
+    "TagLoaderMixin",
+    "ItemMixin",
+    "RadProceduresMixin",
+    "RadItemProceduresMixin"
+  ],
+  "client": [
+    "AbstractContainerScreenMixin",
+    "MinecraftMixin",
+    "HumanoidArmorLayerMixin",
+    "LightTextureMixin",
+    "DynamicTextureMixin",
+    "LivingEntityMixin",
+    "LocalPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

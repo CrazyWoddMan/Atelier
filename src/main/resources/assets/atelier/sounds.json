@@ -16,5 +16,11 @@
   },
   "sewing_machine": {
     "sounds": ["atelier:sewing_machine"]
+  },
+  "nvd_on": {
+    "sounds": ["atelier:nvd_on"]
+  },
+  "nvd_off": {
+    "sounds": ["atelier:nvd_off"]
   }
 }

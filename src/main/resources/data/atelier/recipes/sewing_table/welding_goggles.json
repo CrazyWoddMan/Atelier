@@ -1,0 +1,17 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "tag": "forge:plates/iron",
+      "count": 3
+    },
+    {
+      "tag": "forge:glass_panes",
+      "count": 2
+    }
+  ],
+  "spool": {
+    "tag": "forge:string"
+  },
+  "result": "atelier:welding_goggles"
+}

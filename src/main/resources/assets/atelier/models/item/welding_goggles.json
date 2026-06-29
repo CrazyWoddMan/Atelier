@@ -1,0 +1,8 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0" : "atelier:item/welding_goggles/0",
+		"layer1" : "atelier:item/welding_goggles/1",
+		"layer2" : "atelier:item/welding_goggles/overlay"
+	}
+}

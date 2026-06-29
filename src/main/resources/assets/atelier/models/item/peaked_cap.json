@@ -1,0 +1,8 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0" : "atelier:item/peaked_cap/0",
+		"layer1" : "atelier:item/peaked_cap/1",
+		"layer2" : "atelier:item/peaked_cap/2"
+	}
+}

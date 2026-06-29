@@ -1,0 +1,24 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "item": "atelier:bioplastic",
+      "count": 4
+    },
+    {
+      "tag": "forge:leather"
+    },
+    {
+      "item": "minecraft:lime_stained_glass",
+      "count": 2
+    },
+    {
+      "item": "minecraft:ender_eye",
+      "count": 2
+    }
+  ],
+  "spool": {
+    "tag": "forge:string"
+  },
+  "result": "atelier:nvb"
+}

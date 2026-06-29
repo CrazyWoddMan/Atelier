@@ -1,0 +1,8 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0" : "atelier:item/gasmask_b/0",
+		"layer1" : "atelier:item/gasmask_b/1",
+		"layer2" : "atelier:item/gasmask_b/overlay"
+	}
+}

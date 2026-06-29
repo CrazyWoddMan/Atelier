@@ -1,0 +1,13 @@
+{
+  "entities": [
+    "minecraft:armor_stand",
+    "minecraft:player",
+    "minecraft:zombie",
+    "minecraft:husk",
+    "minecraft:drowned",
+    "minecraft:skeleton",
+    "minecraft:stray",
+    "minecraft:wither_skeleton"
+  ],
+  "slots": ["face", "head", "hands", "body", "back", "suit", "belt", "arm", "legs"]
+}

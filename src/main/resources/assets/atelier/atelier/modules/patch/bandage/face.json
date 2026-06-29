@@ -1,0 +1,15 @@
+{
+  "module": "patch",
+  "wearable": {
+    "item": "atelier:bandage"
+  },
+  "parent": "face",
+  "variants": [
+    {
+      "bodypart": "HEAD",
+      "scale": [0.34, 0.34, 0.34],
+      "rotation": [0, 0, 90],
+      "translate": [0.085, -0.035, -0.28]
+    }
+  ]
+}

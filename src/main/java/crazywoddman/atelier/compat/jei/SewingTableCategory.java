@@ -2,9 +2,9 @@ package crazywoddman.atelier.compat.jei;
 
 import java.util.List;
 import crazywoddman.atelier.Atelier;
+import crazywoddman.atelier.data.SewingRecipe;
 import crazywoddman.atelier.gui.SewingTableScreen;
 import crazywoddman.atelier.items.AtelierItems;
-import crazywoddman.atelier.recipes.SewingRecipe;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -15,7 +15,6 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 
 public class SewingTableCategory implements IRecipeCategory<SewingRecipe> {
@@ -61,15 +60,16 @@ public class SewingTableCategory implements IRecipeCategory<SewingRecipe> {
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, SewingRecipe recipe, IFocusGroup focuses) {
-        builder.addInputSlot(3, 32).addItemStacks(List.of(recipe.spool.getItems()));
+        IRecipeSlotBuilder spoolSlot = builder.addInputSlot(3, 32);
+        recipe.getSpool().ifPresent(spool -> spoolSlot.addItemStacks(List.of(spool.getItems())));
 
         for (int i = 0; i < 9; i++) {
             IRecipeSlotBuilder slot = builder.addInputSlot(4 + i * 18, 63);
 
-            if (i < recipe.ingredients.size())
-                slot.addItemStacks(List.of(recipe.ingredients.get(i).getItems()));
+            if (i < recipe.ingredients.length)
+                slot.addItemStacks(List.of(recipe.ingredients[i].getItems()));
         }
 
-        builder.addOutputSlot(55, 32).addItemStack(recipe.getResultItem(Minecraft.getInstance().level.registryAccess()));
+        builder.addOutputSlot(55, 32).addItemLike(recipe.result);
     }
 }

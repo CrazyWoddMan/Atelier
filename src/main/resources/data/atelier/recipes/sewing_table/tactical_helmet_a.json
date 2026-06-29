@@ -2,7 +2,7 @@
   "type": "atelier:sewing_table",
   "ingredients": [
     {
-      "item": "atelier:phantom_silk",
+      "item": "atelier:phantom_cloth",
       "count": 5
     },
     {
@@ -13,7 +13,5 @@
     "tag": "forge:string",
     "count": 5
   },
-  "result": {
-    "item": "atelier:tactical_helmet_a"
-  }
+  "result": "atelier:tactical_helmet_a"
 }

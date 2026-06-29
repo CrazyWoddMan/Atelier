@@ -5,7 +5,5 @@
       "tag": "minecraft:wool"
     }
   ],
-  "result": {
-    "item": "atelier:skimask"
-  }
+  "result": "atelier:skimask"
 }

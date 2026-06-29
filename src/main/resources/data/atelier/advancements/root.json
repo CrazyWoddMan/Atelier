@@ -1,0 +1,22 @@
+{
+  "criteria": {
+    "by_code": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "background": "minecraft:textures/block/light_gray_wool.png",
+    "description": {
+      "translate": "advancements.atelier.root.description"
+    },
+    "frame": "task",
+    "icon": {
+      "item": "atelier:sewing_table"
+    },
+    "show_toast": false,
+    "title": {
+      "translate": "advancements.atelier.root.description"
+    }
+  }
+}

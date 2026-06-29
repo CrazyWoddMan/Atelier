@@ -1,0 +1,21 @@
+{
+  "criteria": {
+    "by_code": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "atelier:root",
+  "display": {
+    "description": {
+      "translate": "advancements.atelier.nvd_first_use.description"
+    },
+    "frame": "task",
+    "icon": {
+      "item": "atelier:nvb",
+      "nbt": "{Colors:{0:1908001}}"
+    },
+    "title": {
+      "translate": "advancements.atelier.nvd_first_use.title"
+    }
+  }
+}

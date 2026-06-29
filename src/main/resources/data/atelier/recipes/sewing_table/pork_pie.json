@@ -1,0 +1,14 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "item": "atelier:fabric",
+      "count": 5
+    }
+  ],
+  "spool": {
+    "tag": "forge:string",
+    "count": 5
+  },
+  "result": "atelier:pork_pie"
+}

@@ -7,18 +7,39 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 
 public enum AtelierArmorMaterials implements ArmorMaterial {
-    PHANTOM_SILK(
-        AtelierItems.PHANTOM_SILK.getId().getPath(),
-        6,
-        new int[]{1, 4, 2, 1}, // Protection: helmet, chestplate,, leggings, boots
+    PHANTOM_CLOTH(
+        AtelierItems.PHANTOM_CLOTH.getId().getPath(),
+        12,
+        new int[]{3, 4, 2, 1}, // Protection: helmet, chestplate,, leggings, boots
         15,
         SoundEvents.ARMOR_EQUIP_LEATHER,
-        0.0F,
-        0.0F,
-        () -> Ingredient.of(AtelierItems.PHANTOM_SILK.get())
+        0,
+        0,
+        () -> Ingredient.of(AtelierItems.PHANTOM_CLOTH.get())
+    ),
+    BIOPLASTIC(
+        AtelierItems.BIOPLASTIC.getId().getPath(),
+        12,
+        new int[]{3, 4, 2, 1}, // Protection: helmet, chestplate,, leggings, boots
+        15,
+        SoundEvents.ARMOR_EQUIP_LEATHER,
+        0,
+        0,
+        () -> Ingredient.of(AtelierItems.BIOPLASTIC.get())
+    ),
+    LEATHER(
+        "unbreakable_leather",
+        0,
+        new int[]{0, 0, 0, 0},
+        0,
+        SoundEvents.ARMOR_EQUIP_LEATHER,
+        0,
+        0,
+        () -> Ingredient.of(Items.LEATHER)
     );
 
     private static final int[] DURABILITY_MULTIPLIERS = new int[]{13, 15, 16, 11};

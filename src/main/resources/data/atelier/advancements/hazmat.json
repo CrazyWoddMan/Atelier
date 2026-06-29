@@ -1,0 +1,29 @@
+{
+  "parent": "atelier:root",
+  "criteria": {
+    "hazmat": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "atelier:hazmat"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.atelier.hazmat.description"
+    },
+    "icon": {
+      "item": "atelier:hazmat",
+      "nbt": "{Colors:{0:16701501}}"
+    },
+    "title": {
+      "translate": "advancements.atelier.hazmat.title"
+    }
+  }
+}

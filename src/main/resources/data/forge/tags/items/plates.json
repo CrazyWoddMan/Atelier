@@ -1,0 +1,9 @@
+{
+  "values": [
+    "#forge:plates/iron",
+    "#forge:plates/netherite",
+    "#forge:plates/ceramic",
+    "#forge:plates/steel",
+    "#forge:plates/wood"
+  ]
+}

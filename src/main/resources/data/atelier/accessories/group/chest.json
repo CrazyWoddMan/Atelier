@@ -1,5 +1,5 @@
 {
   "replace": false,
   "order": 80,
-  "slots": ["jacket"]
+  "slots": ["body", "suit"]
 }

@@ -1,0 +1,12 @@
+{
+  "type": "atelier:dyeable_transform",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "atelier:belt"
+    }
+  ],
+  "result": {
+    "item": "atelier:sling"
+  }
+}

@@ -1,54 +1,64 @@
 package crazywoddman.atelier.api.templates;
 
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 
 import crazywoddman.atelier.Atelier;
-import crazywoddman.atelier.api.HumanoidModelHelper;
-import crazywoddman.atelier.api.interfaces.IDyable;
+import crazywoddman.atelier.api.interfaces.IDyeable;
 import crazywoddman.atelier.api.interfaces.IWearable;
+import crazywoddman.atelier.api.render.AtelierRenderHelper;
 
+import java.util.List;
 import java.util.function.Consumer;
 
-public abstract class DyableArmor extends ArmorItem implements IWearable, IDyable {
-    private final int defaultColor;
-    private String textureLocation;
-    private String overlayLocation;
-    private HumanoidModel<LivingEntity> model;
-    private boolean init;
+public abstract class DyableArmor extends ArmorItem implements IWearable, IDyeable {
+    private final int[] defaultColors;
+    protected HumanoidModel<LivingEntity> model;
 
-    public DyableArmor(ArmorMaterial material, Type type, Properties properties, int defaultColor) {
+    public DyableArmor(ArmorMaterial material, Type type, Properties properties, int... defaultColors) {
         super(material, type, properties);
-        this.defaultColor = defaultColor;
+        this.defaultColors = defaultColors;
     }
-
-    public DyableArmor(ArmorMaterial material, Type type, Properties properties, int defaultColor, ResourceLocation textureLocation) {
-        this(material, type, properties, defaultColor);
-        this.textureLocation = textureLocation.toString();
-        this.overlayLocation = IWearable.getOverlayTexture(textureLocation).map(ResourceLocation::toString).orElse(Atelier.MODID + ":textures/empty.png");
-        this.init = true;
-    }
-
+    
     @Override
-    public int getDefaultColor() {
-        return this.defaultColor;
+    public int[] getDefaultColors() {
+        return this.defaultColors;
     }
 
     @Override
     public String getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
-        if (!init) {
-            ResourceLocation key = getTextureKey();
-            this.textureLocation = IWearable.getModelTexture(key).toString();
-            this.overlayLocation = IWearable.getOverlayTexture(key).map(ResourceLocation::toString).orElse(Atelier.MODID + ":textures/empty.png");
-        }
-        return type == null ? textureLocation : overlayLocation;
+        return "overlay".equals(type)
+        ? getTexture().getOverlay().map(ResourceLocation::toString).orElse(Atelier.MODID + ":textures/empty.png")
+        : getTexture().get(type).toString();
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, level, tooltip, flag);
+        showColorTooltip(stack, tooltip, flag);
+    }
+
+    @Override
+    public InteractionResult useOn(UseOnContext context) {
+        return caludronClean(context);
+    }
+
+    @Override
+    public SoundEvent getEquipSound() {
+        return equipSound().equip;
     }
 
     @Override
@@ -57,7 +67,7 @@ public abstract class DyableArmor extends ArmorItem implements IWearable, IDyabl
             @Override
             public HumanoidModel<?> getHumanoidArmorModel(LivingEntity living, ItemStack stack, EquipmentSlot slot, HumanoidModel<?> original) {
                 if (model == null)
-                    model = HumanoidModelHelper.bake(getModelKey());
+                    model = AtelierRenderHelper.bake(getLayerKey());
 
                 model.crouching = living.isShiftKeyDown();
                 model.riding = original.riding;

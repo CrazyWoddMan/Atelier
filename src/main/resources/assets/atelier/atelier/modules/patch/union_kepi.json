@@ -1,0 +1,14 @@
+{
+  "module": "patch",
+  "wearable": {
+    "item": "atelier:union_kepi"
+  },
+  "variants": [
+    {
+      "bodypart": "HEAD",
+      "scale": [0.2, 0.2, 0.2],
+      "rotation": [0, 0, 90],
+      "translate": [0.05, -0.5, -0.288]
+    }
+  ]
+}

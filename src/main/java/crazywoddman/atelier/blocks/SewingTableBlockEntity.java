@@ -3,7 +3,6 @@ package crazywoddman.atelier.blocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -15,19 +14,17 @@ import net.minecraftforge.items.ItemStackHandler;
 
 public class SewingTableBlockEntity extends BlockEntity {
     
-    private final ItemStackHandler spoolInventory = new ItemStackHandler(1) {
+    public final ItemStackHandler spoolInventory = new ItemStackHandler(1) {
         @Override
         protected void onContentsChanged(int slot) {
-            BlockPos above = worldPosition.above();
-            BlockState state = level.getBlockState(above);
+            if (level == null || level.isClientSide)
+                return;
 
-            if (level != null && !level.isClientSide && state.getBlock() instanceof SewingTable)
-                level.setBlock(above, state.setValue(SewingTable.SPOOL, !getSpoolStack().isEmpty()), Block.UPDATE_ALL);
-            
+            BlockPos above = worldPosition.above();
+            level.setBlock(above, level.getBlockState(above).setValue(SewingTable.SPOOL, !spoolInventory.getStackInSlot(0).isEmpty()), Block.UPDATE_ALL);
             setChanged();
         }
     };
-    
     private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> spoolInventory);
 
     public SewingTableBlockEntity(BlockPos pos, BlockState blockState) {
@@ -48,27 +45,12 @@ public class SewingTableBlockEntity extends BlockEntity {
 
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER)
-            return handler.cast();
-        
-        return super.getCapability(cap, side);
+        return cap == ForgeCapabilities.ITEM_HANDLER ? handler.cast() : super.getCapability(cap, side);
     }
 
     @Override
     public void invalidateCaps() {
         super.invalidateCaps();
         handler.invalidate();
-    }
-
-    public ItemStackHandler getSpoolInventory() {
-        return spoolInventory;
-    }
-    
-    public ItemStack getSpoolStack() {
-        return spoolInventory.getStackInSlot(0);
-    }
-    
-    public void setSpoolStack(ItemStack stack) {
-        spoolInventory.setStackInSlot(0, stack);
     }
 }

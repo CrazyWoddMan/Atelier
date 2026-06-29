@@ -1,6 +1,7 @@
 {
   "values": [
-    "atelier:gasmask",
-    "atelier:halfmask"
+    "atelier:gasmask_a",
+    "atelier:gasmask_b",
+    "atelier:gasmask_c"
   ]
 }

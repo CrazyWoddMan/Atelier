@@ -1,16 +1,20 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "minecraft:crafting_shapeless",
   "category": "misc",
-  "pattern": [
-    "aaa",
-	  "aaa",
-    "aaa"
-  ],
-  "key": {
-    "a": {
+  "ingredients": [
+    {
+      "item": "atelier:cotton"
+    },
+    {
+      "item": "atelier:cotton"
+    },
+    {
+      "item": "atelier:cotton"
+    },
+    {
       "item": "atelier:cotton"
     }
-  },
+  ],
   "result": {
     "item": "minecraft:white_wool"
   }

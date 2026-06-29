@@ -1,24 +1,22 @@
 package crazywoddman.atelier.gui;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.Comparator;
 import java.util.Optional;
-import crazywoddman.atelier.AtelierSounds;
-import crazywoddman.atelier.api.interfaces.IDyable;
-import crazywoddman.atelier.api.interfaces.IModular;
+
+import org.jetbrains.annotations.Nullable;
+
+import crazywoddman.atelier.api.interfaces.IDyeable;
+import crazywoddman.atelier.blocks.AtelierBlockEntities;
 import crazywoddman.atelier.blocks.AtelierBlocks;
 import crazywoddman.atelier.blocks.SewingTable;
 import crazywoddman.atelier.blocks.SewingTableBlockEntity;
-import crazywoddman.atelier.events.AccessoriesEvents;
-import crazywoddman.atelier.recipes.AtelierRecipes;
-import crazywoddman.atelier.recipes.SewingRecipe;
-import crazywoddman.atelier.recipes.SewingRecipe.CountableIngredient;
-import io.wispforest.accessories.api.AccessoriesAPI;
-import io.wispforest.accessories.api.slot.SlotReference;
+import crazywoddman.atelier.data.AtelierData;
+import crazywoddman.atelier.data.AtelierSounds;
+import crazywoddman.atelier.data.SewingRecipe;
+import crazywoddman.atelier.data.CountableIngredient;
+import crazywoddman.atelier.data.ServerUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -29,332 +27,113 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.DyeableLeatherItem;
+import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.items.SlotItemHandler;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class SewingTableMenu extends AbstractContainerMenu {
-    public static final int SPOOL_SLOT = 0;
-    public static final int INGREDIENTS_START = SPOOL_SLOT + 1;
-    public static final int INGREDIENTS_END = INGREDIENTS_START + 8;
-    public static final int MODIFICATION_SLOT = INGREDIENTS_END + 1;
-    public static final int RESULT_SLOT = MODIFICATION_SLOT + 1;
-    public static final int INVENTORY_START = RESULT_SLOT + 1;
-    public static final int HOTBAR_START = INVENTORY_START + 27;
-    public static final int INVENTORY_END = HOTBAR_START + 8;
-    public static final int SPOOL_SLOT_X = 7;
-    public static final int SPOOL_SLOT_Y = 26;
+public final class SewingTableMenu extends AbstractContainerMenu {
+    static final int TABLE_OFFSET_Y = -19;
+    static final int HOTBAR_SIZE = 9;
+    enum Mode {
+        CRAFTING, COLORING;
+    }
+    final ContainerLevelAccess access;
+    final Inventory inventory;
+    final Slot result;
+    final Slot spool;
+    final Slot[] ingredients = new Slot[HOTBAR_SIZE];
+    final CustomizationSlot customization;
+    final SewingRecipe[] recipes;
+    private final DataSlot selected = DataSlot.standalone();
+    Mode mode = Mode.CRAFTING;
 
-    private final ContainerLevelAccess access;
-    private final Level level;
-    private final Inventory inventory;
-    private final Slot resultSlot;
-    public final Container ingredientSlots;
-    private final Container modification;
-    private final Slot modificationSlot;
-    protected List<String> modificationModules = null;
-    private final SewingTableBlockEntity sewingTable;
-    protected final List<SewingRecipe> recipes;
-
-    private final DataSlot selectedRecipeIndex = DataSlot.standalone();
-    private Runnable slotUpdateListener = () -> {};
-    private int tickStamp;
-
-    public SewingTableMenu(int id, Inventory playerInventory, BlockPos pos) {
+    public SewingTableMenu(int id, Inventory inventory, BlockPos pos) {
         super(AtelierMenuTypes.SEWING_TABLE.get(), id);
-        this.inventory = playerInventory;
-        this.level = playerInventory.player.level();
+        this.inventory = inventory;
+        ServerUtils.grantAdvancement(inventory.player, "root");
+        Level level = inventory.player.level();
         BlockState state = level.getBlockState(pos);
-        
-        if (!(state.getBlock() instanceof SewingTable))
-            throw new IllegalStateException("Block at " + pos + " is not a " + SewingTable.class.getSimpleName());
+        SewingTableBlockEntity blockEntity = level.getBlockEntity(switch (state.getValue(SewingTable.PART)) {
+            case LEFT -> pos;
+            case RIGHT -> pos.relative(state.getValue(BlockStateProperties.HORIZONTAL_FACING).getClockWise());
+            case MACHINE -> pos.below();
+        }, AtelierBlockEntities.SEWING_TABLE.get()).orElse(null);
 
-        BlockEntity blockEntity = switch (state.getValue(SewingTable.PART)) {
-            case LEFT -> level.getBlockEntity(pos);
-            case RIGHT -> level.getBlockEntity(pos.relative(state.getValue(SewingTable.FACING).getClockWise()));
-            case MACHINE -> level.getBlockEntity(pos.below());
-        };
-
-        if (!(blockEntity instanceof SewingTableBlockEntity sewingTable))
-            throw new IllegalStateException("BlockEntity at " + pos.toShortString() + " is not a " + SewingTableBlockEntity.class.getSimpleName());
-
-        this.sewingTable = sewingTable;
-        this.selectedRecipeIndex.set(-1);
-        this.access = ContainerLevelAccess.create(playerInventory.player.level(), pos);
+        this.access = ContainerLevelAccess.create(inventory.player.level(), pos);
         this.recipes = level
             .getRecipeManager()
-            .getAllRecipesFor(AtelierRecipes.SEWING_RECIPE_TYPE.get())
+            .getAllRecipesFor(AtelierData.SEWING_RECIPE_TYPE.get())
             .stream()
-            .sorted((r1, r2) -> r1.getId().compareTo(r2.getId()))
-            .toList();
+            .sorted(Comparator.comparing(SewingRecipe::getId))
+            .toArray(SewingRecipe[]::new);
 
-        // Spool
-        addSlot(new SlotItemHandler(this.sewingTable.getSpoolInventory(), 0, SPOOL_SLOT_X, SPOOL_SLOT_Y) {
-            @Override
-            public void setChanged() {
-                super.setChanged();
-                updateResult();
-            }
-
-            public boolean mayPlace(ItemStack stack) {
-                return super.mayPlace(stack) && ((getRecipeIndex() == -1 || getRecipe().spool.isEmpty()) ? AtelierRecipes.SPOOL_ITEMS.contains(stack.getItem()) : getRecipe().spool.test(stack));
-            };
-        });
-
-        // Ingredients
-        this.ingredientSlots = new SimpleContainer(9);
-        for (int i = 0; i < 9; i++) {
-            int ind = i;
-            addSlot(new Slot(ingredientSlots, i, 8 + i * 18, 57) {
-                private final int localIndex = ind;
-
-                @Override
-                public void setChanged() {
-                    super.setChanged();
-
-                    if (modificationModules != null) {
-                        String slot = modificationModules.get(this.localIndex);
-                        AccessoriesEvents.writeToCompound(modificationSlot.getItem(), getItem(), slot, this.localIndex - modificationModules.indexOf(slot));
-                    } else
-                        updateResult();
-                };
-
-                public int getMaxStackSize() {
-                    return modificationSlot.hasItem() ? 1 : super.getMaxStackSize();
-                };
-
-                @Override
-                public boolean mayPlace(ItemStack stack) {
-                    if (!super.mayPlace(stack))
-                        return false;
-
-                    if (modificationModules != null) {
-                        if (this.localIndex >= modificationModules.size())
-                            return false;
-
-                        String slot = modificationModules.get(this.localIndex);
-                        return AccessoriesAPI.canInsertIntoSlot(stack, SlotReference.of(inventory.player, slot, this.localIndex - modificationModules.indexOf(slot)));
-                    }
-
-                    int selectedIndex = getRecipeIndex();
-                    
-                    if (selectedIndex == -1)
-                        return false;
-
-                    List<CountableIngredient> ingredients = getRecipe(selectedIndex).ingredients;
-                    
-                    return ingredients.size() > this.localIndex && ingredients.get(this.localIndex).test(stack);
-                }
-            });
+        // Hotbar
+        for (int col = 0; col < 9; col++) {
+            addSlot(new Slot(
+                this.inventory,
+                col,
+                col * 18 + 8,
+                142
+            ));
         }
-
-        // Modification
-        this.modification = new SimpleContainer(1);
-        this.modificationSlot = addSlot(new ResultChangingSlot(modification, 0, 59, 26) {
-            @Override
-            public int getMaxStackSize() {
-                return 1;
-            }
-
-            @Override
-            public void setChanged() {
-                super.setChanged();
-                updateIndex(-1);
-
-                if (hasItem() && modificationModules == null) {
-                    ItemStack stack = getItem();
-                    Map<String, Integer> modules = IModular.getModules(stack.getItem());
-                    modificationModules = new ArrayList<>();
-                    modules.keySet()
-                        .stream()
-                        .sorted()
-                        .forEach(key -> {
-                            for (int i = 0; i < modules.get(key); i++)
-                                modificationModules.add(key);
-                        });
-                    Optional.ofNullable(stack.getTag()).map(tag -> tag.getCompound("modules")).ifPresent(tag -> {
-                        for (String module : tag.getAllKeys()) {
-                            ListTag items = tag.getList(module, ListTag.TAG_COMPOUND);
-
-                            for (int i = 0; i < items.size(); i++)
-                                ingredientSlots.setItem(modificationModules.indexOf(module) + i, ItemStack.of(items.getCompound(i)));
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public boolean mayPlace(ItemStack stack) {
-                return super.isActive() && IModular.isModular(stack.getItem());
-            }
-
-            @Override
-            public boolean isActive() {
-                return !resultSlot.isActive() && super.isActive();
-            }
-
-            @Override
-            public void onTake(Player player, ItemStack item) {
-                ingredientSlots.clearContent();
-                modificationModules = null;
-                super.onTake(player, item);
-            };
-        });
-        
-        // Result
-        this.resultSlot = addSlot(new Slot(new SimpleContainer(1), 0, 59, 26) {
-            @Override
-            public boolean isActive() {
-                return super.isActive() && !this.getItem().isEmpty() && modification.isEmpty();
-            }
-
-            @Override
-            public boolean mayPlace(ItemStack stack) {
-                return false;
-            }
-
-            @Override
-            public boolean mayPickup(Player player) {
-                boolean mayPickup = super.mayPickup(player) && hasIngredients();
-                return mayPickup;
-
-            }
-
-            @Override
-            public void onTake(Player player, ItemStack item) {
-                SewingRecipe recipe = getRecipe();
-                sewingTable.getSpoolStack().shrink(recipe.spool.getCount());
-
-                for (CountableIngredient ingredient : recipe.ingredients) {
-                    if (ingredient.isEmpty())
-                        continue;
-                        
-                    int remaining = ingredient.getCount();
-                    
-                    for (int i = INGREDIENTS_START; i < RESULT_SLOT && remaining > 0; i++) {
-                        ItemStack stack = slots.get(i).getItem();
-                        
-                        if (ingredient.test(stack)) {
-                            int toRemove = Math.min(remaining, stack.getCount());
-                            stack.shrink(toRemove);
-                            remaining -= toRemove;
-                        }
-                    }
-                }
-
-                updateResult();
-                if (Math.abs(tickStamp - player.tickCount) > 1) {
-                    tickStamp = player.tickCount;
-                    player.level().playSound(player, sewingTable.getBlockPos(), AtelierSounds.SEWING_MACHINE.get(), SoundSource.BLOCKS, 1, 0.9f + player.getRandom().nextFloat() * 0.1f);
-                }
-                super.onTake(player, item);
-            }
-        });
 
         // Inventory
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++)
                 addSlot(new Slot(
-                    playerInventory,
-                    col + row * 9 + 9,
-                    8 + col * 18,
-                    84 + row * 18
+                    this.inventory,
+                    row * 9 + col + 9,
+                    col * 18 + 8,
+                    row * 18 + 84
                 ));
         }
 
-        // Hotbar
-        for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(
-                playerInventory,
-                col,
-                8 + col * 18,
-                142
-            ));
-        }
+        this.spool = addSlot(new SpoolSlot(blockEntity));
+        Container ingredientsContainer = new SimpleContainer(this.ingredients.length);
 
-        this.addDataSlot(this.selectedRecipeIndex);
-    }
-
-    public int getAvailableCount(Ingredient ingredient) {
-        int available = 0;
-
-        for (int i = INVENTORY_START; i <= INVENTORY_END; i++) {
-            ItemStack stack = this.slots.get(i).getItem();
-
-            if (ingredient.test(stack))
-                available += stack.getCount();
-        }
+        for (int i = 0; i < this.ingredients.length; i++)
+            this.ingredients[i] = addSlot(new IngredientSlot(ingredientsContainer, i));
         
-        return available;
-    }
-
-    public boolean hasIngredients() {
-        int selectedIndex = getRecipeIndex();
-        
-        if (selectedIndex == -1)
-            return false;
-
-        SewingRecipe recipe = getRecipe(selectedIndex);
-
-        if (!recipe.spool.isEmpty()) {
-            ItemStack spool = sewingTable.getSpoolStack();
-
-            if (!recipe.spool.test(spool) || spool.getCount() < recipe.spool.getCount())
-                return false;
-        }
-        
-        for (CountableIngredient required : recipe.ingredients) {
-            if (required.isEmpty())
-                continue;
-                
-            int totalCount = 0;
-            
-            for (int i = INGREDIENTS_START; i < RESULT_SLOT; i++) {
-                ItemStack stack = this.slots.get(i).getItem();
-
-                if (required.test(stack))
-                    totalCount += stack.getCount();
-            }
-            
-            if (totalCount < required.getCount())
-                return false;
-        }
-        
-        return true;
+        addSlot(this.customization = new CustomizationSlot());
+        this.result = addSlot(new ResultSlot(pos));
+        this.addDataSlot(this.selected);
+        this.selected.set(-1);
     }
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         Slot slot = this.slots.get(index);
         
-        if (!slot.hasItem())
+        if (!slot.mayPickup(player) || !slot.hasItem())
             return ItemStack.EMPTY;
         
         ItemStack stack = slot.getItem();
         ItemStack original = stack.copy();
         
-        if (index == RESULT_SLOT) {
-            if (!slot.mayPickup(player) || !this.moveItemStackTo(stack, INVENTORY_START, INVENTORY_END + 1, true))
-                return ItemStack.EMPTY;
-        } else if (index < RESULT_SLOT) {
-            if (!this.moveItemStackTo(stack, INVENTORY_START, INVENTORY_END + 1, index == MODIFICATION_SLOT))
-                return ItemStack.EMPTY;
-        } else if (!this.moveItemStackTo(stack, SPOOL_SLOT, RESULT_SLOT, false)) {
-            if (index < HOTBAR_START) {
-                if (!this.moveItemStackTo(stack, HOTBAR_START, INVENTORY_END + 1, false))
+        if (index < Inventory.INVENTORY_SIZE) {
+            if (!this.moveItemStackTo(stack, Inventory.INVENTORY_SIZE, this.slots.size(), false)) {
+                if (Inventory.isHotbarSlot(index)) {
+                    if (!this.moveItemStackTo(stack, HOTBAR_SIZE, Inventory.INVENTORY_SIZE, false))
+                        return ItemStack.EMPTY;
+                } else if (!this.moveItemStackTo(stack, 0, HOTBAR_SIZE, false))
                     return ItemStack.EMPTY;
-            } else if (!this.moveItemStackTo(stack, INVENTORY_START, HOTBAR_START, false))
-                return ItemStack.EMPTY;
-        }
+            }
+        } else if (!this.moveItemStackTo(stack, 0, Inventory.INVENTORY_SIZE, index == this.result.index || index == this.customization.index))
+            return ItemStack.EMPTY;
 
         slot.onTake(player, stack);
         return original;
+    }
+
+    @Override
+    public boolean clickMenuButton(Player player, int index) {
+        updateSelected(index);
+        return true;
     }
 
     @Override
@@ -365,138 +144,384 @@ public class SewingTableMenu extends AbstractContainerMenu {
     @Override
     public void removed(Player player) {
         super.removed(player);
-
-        this.access.execute((level, pos) -> {
-            clearContainer(player, this.modification);
-            clearContainer(player, this.ingredientSlots);
-        });
+        clearContainer(player, this.customization.container);
+        clearContainer(player, this.ingredients[0].container);
     }
 
-    public int getRecipeIndex() {
-        return this.selectedRecipeIndex.get();
+    int getSelectedIndex() {
+        return this.selected.get();
     }
 
-    public SewingRecipe getRecipe(int index) {
-        return this.recipes.get(index);
+    Optional<SewingRecipe> getSelectedRecipe() {
+        int index = getSelectedIndex();
+        return index == -1 || this.recipes.length == 0 ? Optional.empty() : Optional.of(this.recipes[index]);
     }
 
-    public SewingRecipe getRecipe() {
-        return getRecipe(getRecipeIndex());
+    private void clearSlot(Slot slot) {
+        this.inventory.placeItemBackInInventory(slot.getItem());
+        slot.set(ItemStack.EMPTY);
     }
 
-    private void updateIndex(int index) {
-        if (index < -1 || index >= this.recipes.size() || index == getRecipeIndex())
-            return;
+    private void updateSelected(int index) {
+        if (index != getSelectedIndex())
+            this.selected.set(index);
 
-        this.selectedRecipeIndex.set(index);
+        for (int i = 0; i < this.ingredients.length; i++ ) {
+            ItemStack item = this.ingredients[i].getItem();
 
-        for (int i = 0; i < ingredientSlots.getContainerSize(); i++ ) {
-            ItemStack item = ingredientSlots.getItem(i);
-
-            if (!item.isEmpty() && !getSlot(INGREDIENTS_START + i).mayPlace(item))
-                this.inventory.placeItemBackInInventory(ingredientSlots.removeItemNoUpdate(i));
+            if (!item.isEmpty() && !this.ingredients[i].mayPlace(item))
+                clearSlot(this.ingredients[i]);
         }
 
-        if (index == -1) {
-            if (this.resultSlot.hasItem())
-                this.resultSlot.set(ItemStack.EMPTY);
-        } else {
-            ItemStack spool = sewingTable.getSpoolStack();
-
-            if (!spool.isEmpty()) {
-                Ingredient required = getRecipe(index).spool.asIngredient();
-
-                if (!required.isEmpty() && !required.test(spool))
-                    this.inventory.placeItemBackInInventory(sewingTable.getSpoolInventory().extractItem(0, spool.getCount(), false));
-            }
-
-            updateResult(index);
+        if (this.mode == Mode.CRAFTING) {
+            getSelectedRecipe().ifPresent(recipe ->
+                recipe.getSpool()
+                      .filter(spool -> this.spool.hasItem() && !spool.ingredient.test(this.spool.getItem()))
+                      .ifPresent(s -> clearSlot(this.spool))
+            );
         }
+
+        updateResult();
     }
 
     private void updateResult() {
-        updateResult(getRecipeIndex());
-        slotUpdateListener.run();
+        switch (this.mode) {
+            case CRAFTING -> tryCraft();
+            case COLORING -> tryColor();
+        }
     }
 
-    private void updateResult(int index) {
-        if (hasIngredients()) {
-            ItemStack result = getRecipe(index).getResultItem(this.level.registryAccess());
+    private void tryColor() {
+        DyeColor[] dyes = Arrays
+            .stream(this.ingredients)
+            .map(Slot::getItem)
+            .filter(stack -> !stack.isEmpty())
+            .map(DyeColor::getColor)
+            .toArray(DyeColor[]::new);
+        ItemStack stack = this.customization.createPreview();
 
-            if (result.getItem() instanceof IDyable dyable)
-                calculateColor().ifPresent(color -> dyable.setColor(result, color));
-
-            this.resultSlot.set(result);
-        } else if (this.resultSlot.hasItem())
-            this.resultSlot.set(ItemStack.EMPTY);
+        if (dyes.length > 0) {
+            IDyeable.blendDyeColors(
+                stack,
+                getSelectedIndex(),
+                dyes
+            );
+        }
     }
 
-    @Override
-    public boolean clickMenuButton(Player player, int index) {
-        updateIndex(index == getRecipeIndex() ? -1 : index);
-        return true;
+    private void tryCraft() {
+        if (getSelectedRecipe()
+            .filter(r -> r.getSpool().map(s -> this.spool.hasItem() && s.test(this.spool.getItem())).orElse(true))
+            .map(recipe -> {
+                if (recipe
+                    .getSpool()
+                    .map(required -> this.spool.hasItem() && required.test(this.spool.getItem()))
+                    .orElse(true)
+                ) {
+                    boolean enoughIngredients = true;
+
+                    for (int i = 0; i < recipe.ingredients.length; i++) {
+                        ItemStack stack = this.ingredients[i].getItem();
+                        
+                        if (stack.isEmpty() || !recipe.ingredients[i].test(stack)) {
+                            enoughIngredients = false;
+                            break;
+                        }
+                    }
+
+                    if (enoughIngredients) {
+                        ItemStack result = new ItemStack(recipe.result);
+
+                        if (recipe.result instanceof IDyeable dyable) {
+                            for (int i = 0; i < dyable.getDefaultColors().length; i++) {
+                                int index = i;
+                                tryGetColor(this.ingredients[index].getItem()).ifPresent(color ->
+                                    IDyeable.setColor(result, color, index)
+                                );
+                            }
+                        }
+
+                        this.result.set(result);
+                        return false;
+                    }
+                }
+
+                return true;
+            }).orElse(true)
+        ) {
+            this.result.set(ItemStack.EMPTY);
+        }
     }
 
-    public void registerUpdateListener(Runnable runnable) {
-        this.slotUpdateListener = runnable;
+    private Optional<Integer> tryGetColor(ItemStack stack) {
+        if (!stack.isEmpty()) {
+            Item item = stack.getItem();
+
+            if (item instanceof IDyeable) {
+                return IDyeable.getColorOptional(stack, 0);
+            } else if (item instanceof DyeItem dye) {
+                return Optional.of(IDyeable.convert(dye.getDyeColor().getTextureDiffuseColors()));
+            } else {
+                String name = ForgeRegistries.ITEMS.getKey(item).getPath();
+                for (DyeColor color : DyeColor.values())
+                    if (name.contains(color.getName()))
+                        return Optional.of(IDyeable.convert(color.getTextureDiffuseColors()));
+            }
+        }
+
+        return Optional.empty();
     }
 
-    // TODO: Needs rework
-    private static Optional<Integer> blendDyeColors(DyeColor color) {
-        if (color == null)
-            return Optional.empty();
-        
-        int[] RGB = new int[3];
-        int maxColorSum = 0;
-        int totalColors = 0;
-        
-        float[] floatRGB = color.getTextureDiffuseColors();
-
-        int red = (int)(floatRGB[0] * 255.0F);
-        int green = (int)(floatRGB[1] * 255.0F);
-        int blue = (int)(floatRGB[2] * 255.0F);
-        
-        maxColorSum += Math.max(red, Math.max(green, blue));
-
-        RGB[0] += red;
-        RGB[1] += green;
-        RGB[2] += blue;
-        
-        totalColors++;
-        
-        int avarageRed = RGB[0] / totalColors;
-        int avarageGreen = RGB[1] / totalColors;
-        int avarageBlue = RGB[2] / totalColors;
-        
-        float avarageMaxColor = (float) maxColorSum / totalColors;
-        float actualMaxColor = (float) Math.max(avarageRed, Math.max(avarageGreen, avarageBlue));
-        
-        avarageRed = (int) ((float) avarageRed * avarageMaxColor / actualMaxColor);
-        avarageGreen = (int) ((float) avarageGreen * avarageMaxColor / actualMaxColor);
-        avarageBlue = (int) ((float) avarageBlue * avarageMaxColor / actualMaxColor);
-        
-        return Optional.of((avarageRed << 16) | (avarageGreen << 8) | avarageBlue);
-    }
-
-    private Optional<Integer> calculateColor() {
-        ItemStack stack = this.ingredientSlots.getItem(0);
-        Item item = stack.getItem();
-
-        return item instanceof DyeableLeatherItem dyable ? Optional.of(dyable.getColor(stack)) : blendDyeColors(Arrays.stream(DyeColor.values())
-            .filter(dyeColor -> ForgeRegistries.ITEMS.getKey(item).getPath().contains(dyeColor.name().toLowerCase()))
-            .findFirst()
-            .orElse(null));
-    }
-
-    private class ResultChangingSlot extends Slot {
-        public ResultChangingSlot(Container container, int index, int x, int y) {
+    private class ResultUpdatingSlot extends Slot {
+        ResultUpdatingSlot(Container container, int index, int x, int y) {
             super(container, index, x, y);
         }
 
         @Override
-        public void setChanged() {
-            super.setChanged();
+        public void onTake(Player player, ItemStack stack) {
+            super.onTake(player, stack);
             updateResult();
+            System.out.println("onTake");
+        };
+
+        @Override
+        public void setByPlayer(ItemStack stack) {
+            super.setByPlayer(stack);
+
+            if (!stack.isEmpty())
+                updateResult();
+        };
+    }
+
+    private class SpoolSlot extends ResultUpdatingSlot {
+        SpoolSlot(@Nullable SewingTableBlockEntity blockEntity) {
+            super(blockEntity == null ? new SimpleContainer(1) : new SpoolContainer(blockEntity), 0, 7, TABLE_OFFSET_Y + 36);
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack stack) {
+            if (super.mayPlace(stack)) {
+                if (SewingTableMenu.this.mode == Mode.CRAFTING) {
+                    CountableIngredient spool = getSelectedRecipe().flatMap(SewingRecipe::getSpool).orElse(null);
+
+                    if (spool != null)
+                        return spool.ingredient.test(stack);
+                }
+
+                return AtelierData.SPOOL_ITEMS.contains(stack.getItem());
+            }
+
+            return false;
+        }
+
+        private static class SpoolContainer implements Container {
+            private final ItemStackHandler handler;
+
+            SpoolContainer(SewingTableBlockEntity blockEntity) {
+                this.handler = blockEntity.spoolInventory;
+            }
+
+            @Override
+            public void clearContent() {
+                this.setItem(0, ItemStack.EMPTY);
+            }
+
+            @Override
+            public int getContainerSize() {
+                return 1;
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return this.getItem(0).isEmpty();
+            }
+
+            @Override
+            public ItemStack getItem(int slot) {
+                return this.handler.getStackInSlot(0);
+            }
+
+            @Override
+            public ItemStack removeItem(int slot, int amount) {
+                return this.handler.extractItem(slot, amount, false);
+            }
+
+            @Override
+            public ItemStack removeItemNoUpdate(int slot) {
+                if (!getItem(0).isEmpty())
+                    this.handler.setStackInSlot(0, ItemStack.EMPTY);
+                
+                return ItemStack.EMPTY;
+            }
+
+            @Override
+            public void setItem(int slot, ItemStack stack) {
+                this.handler.setStackInSlot(0, stack);
+            }
+
+            @Override
+            public void setChanged() {}
+
+            @Override
+            public boolean stillValid(Player p_18946_) {
+                return true;
+            }
+        }
+    }
+
+    private class IngredientSlot extends ResultUpdatingSlot {
+        IngredientSlot(Container container, int index) {
+            super(container, index, 8 + index * 18, TABLE_OFFSET_Y + 67);
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack stack) {
+            if (SewingTableMenu.this.mode == Mode.CRAFTING) {
+                SewingRecipe recipe = getSelectedRecipe().orElse(null);
+
+                if (recipe != null) {
+                    int index = getSlotIndex();
+                    return recipe.ingredients.length > index && recipe.ingredients[index].ingredient.test(stack);
+                }
+            }
+
+            return stack.getItem() instanceof DyeItem;
+        }
+    }
+
+    class CustomizationSlot extends Slot {
+        private ItemStack preview;
+        Runnable updateListener = () -> {};
+
+        CustomizationSlot() {
+            super(new SimpleContainer(1), 0, 59, TABLE_OFFSET_Y + 36);
+        }
+
+        @Override
+        public int getMaxStackSize() {
+            return 1;
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack stack) {
+            return stack.getItem() instanceof IDyeable;
+        }
+
+        @Override
+        public boolean isActive() {
+            return !SewingTableMenu.this.result.isActive();
+        }
+
+        @Override
+        public ItemStack getItem() {
+            return this.preview == null ? super.getItem() : this.preview;
+        }
+
+        @Override
+        public ItemStack remove(int amount) {
+            if (this.preview != null)
+                applyColor();
+
+            return super.remove(amount);
+        }
+
+        @Override
+        public void onTake(Player player, ItemStack stack) {
+            consumeDye();
+            super.onTake(player, stack);
+            onItemReplace(Mode.CRAFTING, true);
+        };
+
+        @Override
+        public void set(ItemStack stack) {
+            if (stack.isEmpty())
+                super.set(stack);
+        }
+
+        ItemStack createPreview() {
+            return this.preview = this.container.getItem(0).copy();
+        }
+
+        @Override
+        public void setByPlayer(ItemStack stack) {
+            System.out.println("setByPlayer: " + stack.getDisplayName().getString());
+            if (stack.isEmpty()) {
+                super.set(stack);
+                return;
+            }
+                
+            boolean sameItem;
+
+            if (this.preview != null) {
+                sameItem = ItemStack.isSameItem(stack, this.preview);
+                applyColor();
+                consumeDye();
+            }
+            else sameItem = false;
+            
+            super.set(stack);
+            onItemReplace(Mode.COLORING, !sameItem);
+        }
+
+        private void applyColor() {
+            this.container.getItem(0).setTag(this.preview.getTag());
+            this.preview = null;
+        }
+
+        private void consumeDye() {
+            for (int i = 0; i < SewingTableMenu.this.ingredients.length; i++) {
+                ItemStack ingredient = SewingTableMenu.this.ingredients[i].getItem();
+
+                if (!ingredient.isEmpty())
+                    ingredient.shrink(1);
+            }
+        }
+
+        private void onItemReplace(Mode mode, boolean updateList) {
+            SewingTableMenu.this.mode = mode;
+            updateSelected(mode == Mode.CRAFTING ? -1 : 0);
+
+            if (updateList)
+                this.updateListener.run();
+        }
+    }
+
+    private class ResultSlot extends Slot {
+        private final BlockPos pos;
+        private int tickStamp;
+
+        ResultSlot(BlockPos pos) {
+            super(new SimpleContainer(1), 0, 59, TABLE_OFFSET_Y + 36);
+            this.pos = pos;
+        }
+
+        @Override
+        public boolean isActive() {
+            return hasItem();
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack stack) {
+            return false;
+        }
+
+        @Override
+        public void onTake(Player player, ItemStack item) {
+            SewingRecipe recipe = getSelectedRecipe().get();
+            recipe.getSpool().ifPresent(spool ->
+                SewingTableMenu.this.spool.remove(spool.count)
+            );
+
+            for (int i = 0; i < recipe.ingredients.length; i++)
+                SewingTableMenu.this.ingredients[i].getItem().shrink(recipe.ingredients[i].count);
+            
+            if (Math.abs(this.tickStamp - player.tickCount) > 1) {
+                this.tickStamp = player.tickCount;
+                player.level().playSound(player, this.pos, AtelierSounds.SEWING_MACHINE.get(), SoundSource.BLOCKS, 1, 0.9f + player.getRandom().nextFloat() * 0.1f);
+            }
+
+            updateResult();
+            super.onTake(player, item);
         }
     }
 }

@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.BlockHitResult;
@@ -37,7 +36,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
 
 public class SewingTable extends Block implements EntityBlock {
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty SPOOL = BooleanProperty.create("spool");
     public static final EnumProperty<Part> PART = EnumProperty.create("part", Part.class);
     public enum Part implements StringRepresentable {
@@ -67,12 +65,12 @@ public class SewingTable extends Block implements EntityBlock {
 
     public SewingTable(Properties properties) {
         super(properties);
-        this.registerDefaultState(
+        registerDefaultState(
             this.stateDefinition
-            .any()
-            .setValue(FACING, Direction.NORTH)
-            .setValue(PART, Part.LEFT)
-            .setValue(SPOOL, false)
+                .any()
+                .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH)
+                .setValue(PART, Part.LEFT)
+                .setValue(SPOOL, false)
         );
     }
 
@@ -80,16 +78,15 @@ public class SewingTable extends Block implements EntityBlock {
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return switch (state.getValue(PART)) {
-            case LEFT -> LEFT_SHAPES.get(state.getValue(FACING));
+            case LEFT -> LEFT_SHAPES.get(state.getValue(BlockStateProperties.HORIZONTAL_FACING));
             case RIGHT -> super.getShape(state, world, pos, context);
-            case MACHINE -> MACHINE_SHAPES.get(state.getValue(FACING));
+            case MACHINE -> MACHINE_SHAPES.get(state.getValue(BlockStateProperties.HORIZONTAL_FACING));
         };
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        super.createBlockStateDefinition(builder);
-        builder.add(FACING, PART, SPOOL);
+        super.createBlockStateDefinition(builder.add(BlockStateProperties.HORIZONTAL_FACING, PART, SPOOL));
     }
 
     @Override
@@ -98,29 +95,27 @@ public class SewingTable extends Block implements EntityBlock {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
 
-        if (
-            level.getBlockState(pos.relative(facing.getCounterClockWise())).canBeReplaced(context)
-            && level.getBlockState(pos.above()).canBeReplaced(context)
-            && level.getWorldBorder().isWithinBounds(pos)
+        return (
+            level.getBlockState(pos.relative(facing.getCounterClockWise())).canBeReplaced(context) &&
+            level.getBlockState(pos.above()).canBeReplaced(context) &&
+            level.getWorldBorder().isWithinBounds(pos)
         )
-            return super.getStateForPlacement(context).setValue(FACING, facing).setValue(PART, Part.LEFT);
-
-        return null;
+        ? super.getStateForPlacement(context).setValue(BlockStateProperties.HORIZONTAL_FACING, facing).setValue(PART, Part.LEFT)
+        : null;
     }
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity entity, ItemStack stack) {
         super.setPlacedBy(level, pos, state, entity, stack);
-
-        Direction facing = state.getValue(FACING);
+        Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
         level.setBlock(
             pos.relative(facing.getCounterClockWise()),
-            defaultBlockState().setValue(FACING, facing).setValue(PART, Part.RIGHT),
+            defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, facing).setValue(PART, Part.RIGHT),
             UPDATE_ALL
         );
         level.setBlock(
             pos.above(),
-            defaultBlockState().setValue(FACING, facing).setValue(PART, Part.MACHINE),
+            defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, facing).setValue(PART, Part.MACHINE),
             UPDATE_ALL
         );
     }
@@ -135,12 +130,12 @@ public class SewingTable extends Block implements EntityBlock {
                     pos.getX(),
                     pos.getY(),
                     pos.getZ(),
-                    sewingTable.getSpoolStack()
+                    sewingTable.spoolInventory.getStackInSlot(0)
                 );
 
             BlockPos[] poses = switch (state.getValue(PART)) {
-                case LEFT -> new BlockPos[]{pos.above(), pos.relative(state.getValue(FACING).getCounterClockWise())};
-                case RIGHT -> new BlockPos[]{pos.relative(state.getValue(FACING).getClockWise())};
+                case LEFT -> new BlockPos[]{pos.above(), pos.relative(state.getValue(BlockStateProperties.HORIZONTAL_FACING).getCounterClockWise())};
+                case RIGHT -> new BlockPos[]{pos.relative(state.getValue(BlockStateProperties.HORIZONTAL_FACING).getClockWise())};
                 case MACHINE -> new BlockPos[]{pos.below()};
             };
 
@@ -194,7 +189,6 @@ public class SewingTable extends Block implements EntityBlock {
 
     private static Map<Direction, VoxelShape> shapeMap(VoxelShape northShape) {
         Map<Direction, VoxelShape> map = new EnumMap<>(Direction.class);
-
         map.put(Direction.NORTH, northShape);
 
         for (Direction facing : new Direction[]{Direction.EAST, Direction.SOUTH, Direction.WEST})

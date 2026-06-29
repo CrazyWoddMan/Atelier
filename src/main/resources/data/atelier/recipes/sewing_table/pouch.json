@@ -12,7 +12,5 @@
     "tag": "forge:string",
     "count": 3
   },
-  "result": {
-    "item": "atelier:pouch"
-  }
+  "result": "atelier:pouch"
 }

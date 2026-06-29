@@ -1,0 +1,15 @@
+{
+  "type": "atelier:dyeable_transform",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "atelier:fabric"
+    },
+    {
+      "item": "atelier:biopolymer"
+    }
+  ],
+  "result": {
+    "item": "atelier:biopolyster"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "item": "atelier:fabric"
+    },
+    {
+      "tag": "forge:leather"
+    },
+    {
+      "item": "minecraft:phantom_membrane"
+    }
+  ],
+  "spool": {
+    "tag": "forge:string"
+  },
+  "result": "atelier:phantom_cloth"
+}

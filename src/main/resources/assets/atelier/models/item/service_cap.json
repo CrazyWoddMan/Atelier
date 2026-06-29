@@ -1,7 +1,0 @@
-{
-	"parent": "item/generated",
-	"textures": {
-		"layer0" : "atelier:item/service_cap",
-		"layer1" : "atelier:item/service_cap_overlay"
-	}
-}

@@ -1,8 +1,8 @@
 {
 	"parent": "item/generated",
 	"textures": {
-		"layer0" : "atelier:item/belt",
-        "layer1" : "atelier:item/belt_overlay"
+		"layer0" : "atelier:item/belt/0",
+        "layer1" : "atelier:item/belt/1"
 	},
 	"display": {
         "thirdperson_righthand": {

@@ -1,0 +1,8 @@
+{
+  "values": [
+    "#crusty_chunks:firearm"
+  ],
+  "remove": [
+    "#crusty_chunks:pistol"
+  ]
+}

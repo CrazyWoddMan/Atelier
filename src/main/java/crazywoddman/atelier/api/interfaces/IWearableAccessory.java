@@ -2,58 +2,40 @@ package crazywoddman.atelier.api.interfaces;
 
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.Nullable;
-
-import crazywoddman.atelier.api.SimpleWearableRenderer;
-import io.wispforest.accessories.api.Accessory;
-import io.wispforest.accessories.api.SoundEventData;
-import io.wispforest.accessories.api.client.AccessoryRenderer;
-import io.wispforest.accessories.api.slot.SlotReference;
-import net.minecraft.sounds.SoundEvents;
+import crazywoddman.atelier.Atelier;
+import crazywoddman.atelier.api.SimpleSlot;
+import crazywoddman.atelier.api.render.SimpleAccessoryRenderer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
-public interface IWearableAccessory extends IWearable, Accessory {
+public interface IWearableAccessory extends IWearable {
+    static final String
+    HAT = Atelier.ACCESSORIES_LOADED ? "hat" : "head",
+    FACE = "face",
+    BODY = "body",
+    SUIT = "suit",
+    ARM = "arm",
+    HAND = Atelier.ACCESSORIES_LOADED ? "hand" : "hands",
+    BELT = "belt",
+    LEGS = "legs";
     
-    default Supplier<AccessoryRenderer> getRenderer() {
-        return () -> new SimpleWearableRenderer(getTextureKey(), getModelKey(), ref -> true);
+    default Supplier<IAccessoryRenderer> getRenderer() {
+        return () -> new SimpleAccessoryRenderer(getTexture(), getLayerKey());
     }
 
-    @Override
-    default int maxStackSize(ItemStack stack) {
-        return 1;
+    default void onEquip(ItemStack stack, LivingEntity entity, SimpleSlot slot) {
+        equipSound().playEquip(entity, null);
     }
 
-    @Override
-    default void onEquip(ItemStack stack, SlotReference reference) {
-        playSound(reference, getEquipSound());
+    default void onUnequip(ItemStack stack, LivingEntity entity, SimpleSlot slot) {
+        equipSound().playUnequip(entity, null);
     }
 
-    @Override
-    default void onUnequip(ItemStack stack, SlotReference reference) {
-        playSound(reference, getUnequipSound());
-    }
+    default void wearTick(ItemStack stack, LivingEntity entity, SimpleSlot slot) {}
 
-    public static void playSound(SlotReference reference, SoundEventData sound) {
-        if (sound != null) {
-            LivingEntity entity = reference.entity();
-            entity.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), sound.event(), entity.getSoundSource(), sound.volume(), sound.pitch());
-        }
+    default boolean canEquipFromUse(ItemStack stack) {
+        return true;
     }
-
-    @Nullable
-    default SoundEventData getEquipSound() {
-        return new SoundEventData(SoundEvents.ARMOR_EQUIP_LEATHER, 1, 1);
-    }
-
-    @Nullable
-    default SoundEventData getUnequipSound() {
-        SoundEventData sound = getEquipSound();
-        return sound == null ? null : new SoundEventData(sound.event(), sound.volume(), sound.pitch() * 0.8f);
-    }
-
-    @Override
-    default void onEquipFromUse(ItemStack stack, SlotReference reference) {}
 
     /**
     * For hats only!

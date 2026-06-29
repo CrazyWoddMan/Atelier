@@ -1,0 +1,10 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "item": "atelier:biopolyster",
+      "count": 16
+    }
+  ],
+  "result": "atelier:hazmat"
+}

@@ -1,0 +1,18 @@
+{
+  "module": "pouch",
+  "wearable": {
+    "item": "atelier:belt"
+  },
+  "variants": [
+    {
+      "bodypart": "BODY",
+      "translate": [0, -1.5, 0],
+      "scale": [2, 2, 2]
+    },
+    {
+      "bodypart": "BODY",
+      "translate": [0, -1.5, 0],
+      "scale": [-2, 2, 2]
+    }
+  ]
+}

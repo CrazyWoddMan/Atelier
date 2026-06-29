@@ -1,0 +1,7 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0" : "atelier:item/sling/0",
+        "layer1" : "atelier:item/sling/1"
+	}
+}

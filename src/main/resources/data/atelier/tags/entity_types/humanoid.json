@@ -2,14 +2,10 @@
   "values": [
     "#accessories:defaulted_targets",
     "minecraft:zombie",
-    "minecraft:zombie_villager",
     "minecraft:husk",
     "minecraft:drowned",
     "minecraft:skeleton",
     "minecraft:stray",
-    "minecraft:wither_skeleton",
-    "minecraft:piglin",
-    "minecraft:piglin_brute",
-    "minecraft:zombified_piglin"
+    "minecraft:wither_skeleton"
   ]
 }

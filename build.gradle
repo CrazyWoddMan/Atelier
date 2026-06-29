@@ -16,7 +16,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 minecraft {
     mappings channel: mapping_channel, version: mapping_version
-    copyIdeResources = true
+    
     runs {
         configureEach {
             workingDirectory project.file('run')
@@ -76,14 +76,21 @@ repositories {
         }
     }
     maven {
-        url 'https://cursemaven.com'
+        name = 'Curios'
+        url = 'https://maven.theillusivec4.top/'
         content {
-            includeGroup 'curse.maven'
+            includeGroup 'top.theillusivec4.curios'
         }
     }
     flatDir {
         name 'Warium, Valkyrien Warium'
         dir 'libs'
+    }
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
     }
 }
 
@@ -109,18 +116,19 @@ dependencies {
         exclude group: "dev.su5ed.sinytra.fabric-api"
     }
 
-    implementation fg.deobf("curse.maven:fast-nbt-1417466:7463766")
+    compileOnly "top.theillusivec4.curios:curios-forge:5.14.1+1.20.1"
+
+    compileOnly fg.deobf("curse.maven:oculus-581495:6020952")
 }
 
 mixin {
     add sourceSets.main, "${mod_id}.mixins.refmap.json"
     config "${mod_id}.mixins.json"
-
-    debug.verbose = true
-    debug.export = true
 }
 
 tasks.named('processResources', ProcessResources).configure {
+    exclude '**/*.psd'
+    
     var replaceProperties = [
             mc_version: mc_version,
             forge_version: forge_version,

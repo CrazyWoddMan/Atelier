@@ -4,10 +4,6 @@
     {
       "conditions": [
         {
-          "type": "forge:tag_empty",
-          "tag": "forge:plates/netherite"
-        },
-        {
           "type": "forge:mod_loaded",
           "modid": "create"
         }
@@ -29,8 +25,7 @@
     {
       "conditions": [
         {
-          "type": "forge:tag_empty",
-          "tag": "forge:plates/netherite"
+          "type": "forge:true"
         }
       ],
       "recipe": {

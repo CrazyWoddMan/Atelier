@@ -1,0 +1,18 @@
+{
+  "type": "atelier:sewing_table",
+  "ingredients": [
+    {
+      "item": "atelier:fabric",
+      "count": 3
+    },
+    {
+      "item": "atelier:fabric",
+      "count": 2
+    }
+  ],
+  "spool": {
+    "tag": "forge:string",
+    "count": 5
+  },
+  "result": "atelier:peaked_cap"
+}

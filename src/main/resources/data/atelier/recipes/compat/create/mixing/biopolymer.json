@@ -1,0 +1,27 @@
+{
+  "type": "create:mixing",
+  "ingredients": [
+    {
+      "tag": "atelier:starch_containing"
+    },
+    {
+      "tag": "atelier:starch_containing"
+    },
+    {
+      "tag": "forge:slimeballs"
+    },
+    {
+      "item": "minecraft:sugar"
+    },
+    {
+      "amount": 500,
+      "fluid": "minecraft:water"
+    }
+  ],
+  "results": [
+    {
+      "item": "atelier:biopolymer",
+      "count": 2
+    }
+  ]
+}

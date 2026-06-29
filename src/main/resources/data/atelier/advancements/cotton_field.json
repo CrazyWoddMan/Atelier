@@ -19,7 +19,7 @@
     "announce_to_chat": true,
     "hidden": false
   },
-  "parent": "minecraft:adventure/root",
+  "parent": "atelier:root",
   "criteria": {
     "atelier:cotton_field": {
       "trigger": "minecraft:location",

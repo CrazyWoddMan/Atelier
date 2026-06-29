@@ -1,0 +1,26 @@
+{
+  "module": "pouch",
+  "wearable": {
+    "item": "atelier:armor_vest_b"
+  },
+  "variants": [
+    {
+      "bodypart": "BODY",
+      "scale": [2, 2, 2],
+      "rotation": [0, 0, 0],
+      "translate": [0, -1.735, -0.03]
+    },
+    {
+      "bodypart": "BODY",
+      "scale": [2, 2, 2],
+      "rotation": [0, 0, 0],
+      "translate": [0.156, -1.735, -0.03]
+    },
+    {
+      "bodypart": "BODY",
+      "scale": [-2, 2, 2],
+      "rotation": [0, 0, 0],
+      "translate": [0, -1.735, -0.03]
+    }
+  ]
+}
