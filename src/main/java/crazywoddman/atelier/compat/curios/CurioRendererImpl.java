@@ -36,6 +36,8 @@ class CurioRendererImpl implements ICurioRenderer {
         float HeadYaw,
         float headPitch
     ) {
+        pose.pushPose();
         renderer.render(stack, context.entity(), SimpleSlot.of(context.identifier(), context.index()), pose, renderLayerParent.getModel(), buffer, light);
+        pose.popPose();
     }
 }

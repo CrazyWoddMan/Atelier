@@ -1,40 +1,33 @@
 package crazywoddman.atelier.compat.jei;
 
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.vanilla.IJeiBrewingRecipe;
 import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import crazywoddman.atelier.Atelier;
 import crazywoddman.atelier.data.AtelierTags;
 import crazywoddman.atelier.data.AtelierData;
 import crazywoddman.atelier.items.AtelierItems;
 import crazywoddman.atelier.items.templates.FilterItem;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.helpers.IGuiHelper;
-import mezz.jei.api.ingredients.IIngredientHelper;
-import mezz.jei.api.ingredients.IIngredientRenderer;
-import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
-import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IJeiRuntime;
-import mezz.jei.common.Internal;
-import mezz.jei.common.config.IClientConfig;
-import mezz.jei.common.gui.JeiTooltip;
-import mezz.jei.common.platform.Services;
-import mezz.jei.common.util.SafeIngredientUtil;
-import mezz.jei.library.gui.ingredients.TagContentTooltipComponent;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
@@ -126,45 +119,13 @@ public class AtelierJEI implements IModPlugin {
         );
     }
 
-    public static boolean renderJeiTooltip(ItemStack display, ItemStack[] items, GuiGraphics graphics, int x, int y) {
-        IJeiRuntime jeiRuntime = AtelierJEI.jeiRuntime;
-
-        if (jeiRuntime != null) { 
-            IClientConfig jeiConfig = Internal.getJeiClientConfigs().getClientConfig();
-
-            if (jeiConfig.isTagContentTooltipEnabled()) {
-                if (items.length > 1) {
-                    JeiTooltip tooltip = new JeiTooltip();
-                    IIngredientManager ingredientManager = jeiRuntime.getIngredientManager();
-                    IIngredientType<ItemStack> type = ingredientManager.getIngredientTypeChecked(ItemStack.class).get();
-                    IIngredientRenderer<ItemStack> renderer = ingredientManager.getIngredientRenderer(type);
-                    SafeIngredientUtil.getTooltip(tooltip, ingredientManager, renderer, ingredientManager.createTypedIngredient(type, display).get());
-                    List<ItemStack> ingredients = List.of(items);
-
-                    if (!jeiConfig.isHideSingleIngredientTagsEnabled() || ingredients.size() != 1) {
-                        IIngredientHelper<ItemStack> ingredientHelper = ingredientManager.getIngredientHelper(type);
-                        ingredientHelper.getTagKeyEquivalent(ingredients).ifPresent(tag -> {
-                            tooltip.add(Component
-                                .translatable("jei.tooltip.recipe.tag", "")
-                                .withStyle(ChatFormatting.GRAY)
-                            );
-                            tooltip.add(Services.PLATFORM
-                                .getRenderHelper()
-                                .getName(tag)
-                                .copy()
-                                .withStyle(ChatFormatting.GRAY)
-                            );
-                        });
-                    }
-
-                    tooltip.add(new TagContentTooltipComponent<ItemStack>(renderer, ingredients));
-                    tooltip.draw(graphics, x, y);
-                    
-                    return true;
-                }
-            }
-        }
-
-        return false;
+    @SuppressWarnings("unchecked")
+    public static void drawRichTooltip(int display, ItemStack[] items, GuiGraphics graphics, int x, int y) {
+        jeiRuntime.getRecipeManager().createRecipeSlotDrawable(
+            RecipeIngredientRole.INPUT,
+            Arrays.stream(items).map(i -> (Optional<ITypedIngredient<?>>)(Object)jeiRuntime.getIngredientManager().createTypedIngredient(i)).toList(),
+            IntSet.of(display),
+            0
+        ).drawTooltip(graphics, x, y);
 	}
 }

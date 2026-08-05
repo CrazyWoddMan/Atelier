@@ -18,12 +18,13 @@ license="MIT"
     modId="forge"
     mandatory=true 
     versionRange="[${forge_version},)"
-    ordering="NONE"
-    side="BOTH"
 
 [[dependencies.${mod_id}]]
     modId="minecraft"
     mandatory=true
     versionRange="[${mc_version}]"
-    ordering="NONE"
-    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="jei"
+    mandatory=false
+    versionRange="[${jei_version},)"

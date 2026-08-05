@@ -13,44 +13,9 @@ base {
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 minecraft {
     mappings channel: mapping_channel, version: mapping_version
-    
-    runs {
-        configureEach {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        client {
-            property 'forge.enabledGameTestNamespaces', mod_id
-        }
-
-        server {
-            property 'forge.enabledGameTestNamespaces', mod_id
-            args '--nogui'
-        }
-
-        gameTestServer {
-            property 'forge.enabledGameTestNamespaces', mod_id
-        }
-
-        data {
-            workingDirectory project.file('run-data')
-            property 'mixin.env.disable', 'true'
-            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-        }
-    }
 }
-
-sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
     maven {
@@ -103,9 +68,7 @@ dependencies {
 
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
 
-    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common:15.20.0.112")
-    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-lib:15.20.0.112")
-    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:15.20.0.112")
+    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
 
     implementation fg.deobf("com.github.glitchfiend:TerraBlender-forge:${mc_version}-3.0.1.10")
 
@@ -130,18 +93,19 @@ tasks.named('processResources', ProcessResources).configure {
     exclude '**/*.psd'
     
     var replaceProperties = [
-            mc_version: mc_version,
-            forge_version: forge_version,
-            loader_version_range: loader_version_range,
-            mod_group_id: mod_group_id,
-            mod_id: mod_id,
-            mod_name: mod_name,
-            mod_license: mod_license,
-            mod_version: mod_version,
-            mod_authors: mod_authors,
-            credits: credits,
-            mod_description: mod_description,
-            warium_version: warium_version
+        mc_version          : mc_version,
+        forge_version       : forge_version,
+        loader_version_range: loader_version_range,
+        mod_group_id        : mod_group_id,
+        mod_id              : mod_id,
+        mod_name            : mod_name,
+        mod_license         : mod_license,
+        mod_version         : mod_version,
+        mod_authors         : mod_authors,
+        credits             : credits,
+        mod_description     : mod_description,
+        warium_version      : warium_version,
+        jei_version         : jei_version
     ]
     inputs.properties replaceProperties
 
@@ -151,41 +115,10 @@ tasks.named('processResources', ProcessResources).configure {
 }
 
 tasks.named('jar', Jar).configure {
-    dependsOn 'cleanLibs'
-    
-    manifest {
-        attributes([
-                'Specification-Title'     : mod_id,
-                'Specification-Vendor'    : mod_authors,
-                'Specification-Version'   : '1',
-                'Implementation-Title'    : project.name,
-                'Implementation-Version'  : project.jar.archiveVersion,
-                'Implementation-Vendor'   : mod_authors,
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
-    }
-
     finalizedBy 'reobfJar'
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-    options.compilerArgs += ["-Xlint:-removal"]
+    options.compilerArgs += "-Xlint:-removal"
 }
-
-tasks.register('cleanLibs', Delete) {
-    delete fileTree(dir: "$buildDir/libs", include: '*.jar')
-}
-
-tasks.register('copyModJar', Copy) {
-    dependsOn build
-    from("$buildDir/libs/") {
-        include '*.jar'
-    }
-    into System.getenv('MC_TESTS_DIR')
-    onlyIf {
-        file(System.getenv('MC_TESTS_DIR')).exists()
-    }
-}
-
-build.finalizedBy(copyModJar)

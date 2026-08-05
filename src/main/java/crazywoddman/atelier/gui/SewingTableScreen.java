@@ -239,7 +239,11 @@ public final class SewingTableScreen extends AbstractContainerScreen<SewingTable
 
     @SafeVarargs
     private static <T> T cycleEverySecond(T... objects) {
-        return objects[objects.length > 1 ? (int)(System.currentTimeMillis() / 1000 % objects.length) : 0];
+        return objects[objects.length > 1 ? cycleEverySecond(objects.length) : 0];
+    }
+
+    private static int cycleEverySecond(int range) {
+        return (int)(System.currentTimeMillis() / 1000 % range);
     }
 
     private static class GhostItem implements MultiBufferSource {
@@ -325,10 +329,13 @@ public final class SewingTableScreen extends AbstractContainerScreen<SewingTable
 
     private void renderIngredientTooltip(Ingredient ingredient, GuiGraphics graphics, int x, int y) {
         ItemStack[] stacks = ingredient.getItems();
-        ItemStack display = cycleEverySecond(stacks);
+        int display = cycleEverySecond(stacks.length);
 
-        if (!Atelier.JEI_LOADED || !AtelierJEI.renderJeiTooltip(display, stacks, graphics, x, y))
-            graphics.renderTooltip(this.font, display, x, y);
+        if (Atelier.JEI_LOADED && stacks.length > 1) {
+            AtelierJEI.drawRichTooltip(display, stacks, graphics, x, y);
+        } else {
+            graphics.renderTooltip(this.font, stacks[display], x, y);
+        }
 	}
 
     @Override

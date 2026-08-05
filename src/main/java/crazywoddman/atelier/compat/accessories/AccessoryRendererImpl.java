@@ -35,6 +35,8 @@ class AccessoryRendererImpl implements AccessoryRenderer {
         float HeadYaw,
         float headPitch
     ) {
+        pose.pushPose();
         renderer.render(stack, reference.entity(), SimpleSlot.of(reference.slotName(), reference.slot()), pose, model, buffer, light);
+        pose.popPose();
     }
 }
