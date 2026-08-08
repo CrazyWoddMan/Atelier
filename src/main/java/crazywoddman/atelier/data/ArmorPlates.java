@@ -7,6 +7,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.event.AddReloadListenerEvent;
 
@@ -55,7 +56,8 @@ public class ArmorPlates extends SimpleJsonResourceReloadListener {
 
         for (Ingredient ingredient : PLATES.keySet())
             for (ItemStack stack : ingredient.getItems())
-                CACHE.put(stack.getItem(), PLATES.get(ingredient));
+                if (!stack.is(Items.BARRIER))
+                    CACHE.put(stack.getItem(), PLATES.get(ingredient));
     }
 
     public static void register(AddReloadListenerEvent event) {

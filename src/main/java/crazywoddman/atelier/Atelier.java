@@ -22,7 +22,13 @@ import org.apache.maven.artifact.versioning.VersionRange;
 @Mod(Atelier.MODID)
 public class Atelier {
     public static final String MODID = "atelier";
-    public static final boolean CLOTH_CONFIG_LOADED, WARIUM_LOADED, JEI_LOADED, TERRABLENDER_LOADED, ACCESSORIES_LOADED, CURIOS_LOADED;
+    public static final boolean
+    CLOTH_CONFIG_LOADED,
+    WARIUM_LOADED,
+    JEI_LOADED,
+    TERRABLENDER_LOADED,
+    ACCESSORIES_LOADED,
+    CURIOS_LOADED;
 
     static {
         ModList modlist = ModList.get();
