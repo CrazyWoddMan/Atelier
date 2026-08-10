@@ -2,7 +2,7 @@
   "type": "atelier:sewing_table",
   "ingredients": [
     {
-      "tag": "atelier:fabric",
+      "item": "atelier:fabric",
       "count": 5
     },
     {
