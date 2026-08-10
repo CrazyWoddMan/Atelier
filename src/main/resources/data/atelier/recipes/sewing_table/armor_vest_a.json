@@ -2,7 +2,7 @@
   "type": "atelier:sewing_table",
   "ingredients": [
     {
-      "item": "atelier:phantom_cloth",
+      "tag": "atelier:armor_materials",
       "count": 8
     }
   ],
