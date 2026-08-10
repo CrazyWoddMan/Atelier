@@ -48,6 +48,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
@@ -194,9 +195,14 @@ public class AtelierForgeEvents {
         if (stack.isEmpty() || event.getClickAction() != ClickAction.SECONDARY)
             return;
 
+        Slot slot = event.getSlot();
+        Player player = event.getPlayer();
+
+        if (!slot.allowModification(player))
+            return;
+
         IModular.getModules(stack.getItem()).ifPresent(modules -> {
             event.setCanceled(true);
-            Player player = event.getPlayer();
 
             if (!player.level().isClientSide || !player.isLocalPlayer())
                 return;
@@ -224,7 +230,7 @@ public class AtelierForgeEvents {
                     setter.accept(chosen);
 
                     if (!creativeInventory)
-                        StackClickedPacket.send(event.getSlot(), module, previewDown ? ClientModuleTooltip.preview : StackClickedPacket.NO_PREVIEW);
+                        StackClickedPacket.send(slot, module, previewDown ? ClientModuleTooltip.preview : StackClickedPacket.NO_PREVIEW);
 
                     return;
                 }
@@ -251,7 +257,7 @@ public class AtelierForgeEvents {
             }
 
             if (!creativeInventory)
-                StackClickedPacket.send(event.getSlot(), module, StackClickedPacket.NO_PREVIEW);
+                StackClickedPacket.send(slot, module, StackClickedPacket.NO_PREVIEW);
 
             if (!carriedDevided)
                 event.getCarriedSlotAccess().set(output);

@@ -272,7 +272,7 @@ public final class SewingTableMenu extends AbstractContainerMenu {
         return Optional.empty();
     }
 
-    private class ResultUpdatingSlot extends Slot {
+    private class ResultUpdatingSlot extends UnmodifiableSlot {
         ResultUpdatingSlot(Container container, int index, int x, int y) {
             super(container, index, x, y);
         }
@@ -389,7 +389,7 @@ public final class SewingTableMenu extends AbstractContainerMenu {
         }
     }
 
-    class CustomizationSlot extends Slot {
+    class CustomizationSlot extends UnmodifiableSlot {
         private ItemStack preview;
         Runnable updateListener = () -> {};
 
@@ -486,7 +486,7 @@ public final class SewingTableMenu extends AbstractContainerMenu {
         }
     }
 
-    private class ResultSlot extends Slot {
+    private class ResultSlot extends UnmodifiableSlot {
         private final BlockPos pos;
         private int tickStamp;
 
@@ -522,6 +522,18 @@ public final class SewingTableMenu extends AbstractContainerMenu {
 
             updateResult();
             super.onTake(player, item);
+        }
+    }
+
+    static class UnmodifiableSlot extends Slot {
+
+        UnmodifiableSlot(Container container, int slot, int x, int y) {
+            super(container, slot, x, y);
+        }
+
+        @Override
+        public boolean allowModification(Player player) {
+            return false;
         }
     }
 }
