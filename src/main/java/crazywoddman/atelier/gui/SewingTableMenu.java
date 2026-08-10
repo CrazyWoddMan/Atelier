@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.Optional;
 
 import org.jetbrains.annotations.Nullable;
-
 import crazywoddman.atelier.api.interfaces.IDyeable;
 import crazywoddman.atelier.blocks.AtelierBlockEntities;
 import crazywoddman.atelier.blocks.AtelierBlocks;
@@ -123,9 +122,14 @@ public final class SewingTableMenu extends AbstractContainerMenu {
                 } else if (!this.moveItemStackTo(stack, 0, HOTBAR_SIZE, false))
                     return ItemStack.EMPTY;
             }
-        } else if (!this.moveItemStackTo(stack, 0, Inventory.INVENTORY_SIZE, index == this.result.index || index == this.customization.index))
+        } else if (index == this.customization.index) {
+            if (this.moveItemStackTo(stack, 0, Inventory.INVENTORY_SIZE, true)) {
+                this.customization.container.clearContent();
+            } else return ItemStack.EMPTY;
+        } else if (!this.moveItemStackTo(stack, 0, Inventory.INVENTORY_SIZE, index == this.result.index))
             return ItemStack.EMPTY;
 
+        
         slot.onTake(player, stack);
         return original;
     }
@@ -281,7 +285,6 @@ public final class SewingTableMenu extends AbstractContainerMenu {
         public void onTake(Player player, ItemStack stack) {
             super.onTake(player, stack);
             updateResult();
-            System.out.println("onTake");
         };
 
         @Override
@@ -390,7 +393,7 @@ public final class SewingTableMenu extends AbstractContainerMenu {
     }
 
     class CustomizationSlot extends UnmodifiableSlot {
-        private ItemStack preview;
+        ItemStack preview;
         Runnable updateListener = () -> {};
 
         CustomizationSlot() {
@@ -444,7 +447,6 @@ public final class SewingTableMenu extends AbstractContainerMenu {
 
         @Override
         public void setByPlayer(ItemStack stack) {
-            System.out.println("setByPlayer: " + stack.getDisplayName().getString());
             if (stack.isEmpty()) {
                 super.set(stack);
                 return;
