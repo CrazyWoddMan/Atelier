@@ -28,7 +28,8 @@ public class Atelier {
     JEI_LOADED,
     TERRABLENDER_LOADED,
     ACCESSORIES_LOADED,
-    CURIOS_LOADED;
+    CURIOS_LOADED,
+    CREATE_LOADED;
 
     static {
         ModList modlist = ModList.get();
@@ -38,6 +39,7 @@ public class Atelier {
         TERRABLENDER_LOADED = modlist.isLoaded("terrablender");
         ACCESSORIES_LOADED = modlist.isLoaded("accessories");
         CURIOS_LOADED = modlist.isLoaded("curios");
+        CREATE_LOADED = modlist.isLoaded("create");
     }
 
     public Atelier(FMLJavaModLoadingContext context) throws InvalidVersionSpecificationException {

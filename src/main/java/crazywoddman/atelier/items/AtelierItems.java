@@ -67,7 +67,6 @@ public class AtelierItems {
     public static final RegistryObject<Item> BIOPLASTIC = REGISTRY.register("bioplastic", () -> new SimpleDyeable(IDyeable.BIOPOLYMER));
 
     public static final RegistryObject<Item> NETHERITE_PLATE = SILENT_REGISTRY.register("netherite_plate", SimpleItem::new);
-    public static final RegistryObject<Item> IRON_PLATE = SILENT_REGISTRY.register("iron_plate", SimpleItem::new);
     public static final RegistryObject<Item> WOODEN_PLATE = SILENT_REGISTRY.register("wooden_plate", SimpleItem::new);
     public static final RegistryObject<Item> CERAMIC_PLATE = SILENT_REGISTRY.register("ceramic_plate", SimpleItem::new);
 
@@ -126,6 +125,11 @@ public class AtelierItems {
     public static final RegistryObject<Item> BASE_FILTER = SILENT_REGISTRY.register("base_filter", BaseFilter::new);
     public static final RegistryObject<Item> ADVANCED_FILTER = SILENT_REGISTRY.register("advanced_filter", AdvancedFilter::new);
     public static final RegistryObject<Item> DETONATOR = SILENT_REGISTRY.register("detonator", Detonator::new);
+
+    static {
+        if (!Atelier.CREATE_LOADED)
+            SILENT_REGISTRY.register("iron_plate", SimpleItem::new);
+    }
 
     private static RegistryObject<Item> registerBlock(RegistryObject<Block> block) {
         return REGISTRY.register(block.getId().getPath(), () -> new BlockItem(block.get(), new Item.Properties()));

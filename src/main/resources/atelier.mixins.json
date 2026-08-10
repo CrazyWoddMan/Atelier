@@ -8,7 +8,6 @@
     "PlateDamageMixin",
     "FakingGasMaskMixin",
     "GrassBlockMixin",
-    "TagLoaderMixin",
     "ItemMixin",
     "RadProceduresMixin",
     "RadItemProceduresMixin"

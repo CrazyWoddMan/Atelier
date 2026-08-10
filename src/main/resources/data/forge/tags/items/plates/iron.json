@@ -1,5 +1,8 @@
 {
   "values": [
-    "atelier:iron_plate"
+    {
+      "id": "atelier:iron_plate",
+      "required": false
+    }
   ]
 }
